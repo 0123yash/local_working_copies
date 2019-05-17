@@ -1,0 +1,739 @@
+
+
+===================================================================================================================================================
+
+8 February - 
+
+All the changes in fix_embed model (using kaggle included dataset, frozen embedding layer) - 
+
+word2vec of vocab - taken input from config file word2vec location
+get_datasets_mrpolarity function modified for kaggle dataset
+
+vim train_fix_embed.py 
+- dev sample perc - 0.10 instead of 0.05
+- config_fix_embed.yml
+- data_helpers.get_datasets_mrpolarity_pandas function called
+- word2vec_wv = KeyedVectors.load_word2vec_format(cfg['word_embeddings']['word2vec']['path'], binary=True)
+- import data_helpers_fix_embed as data_helpers
+- from text_cnn_fix_embed import TextCNN
+
+vim train_fix_embedV2.py 
+- all the changes of train_fix_embed.py
+- batch_dev_step function instead of dev_step function
+
+vim config_fix_embed.yml
+- path: /data/ourdata/yash_work/english_cleaned/eng_comments_min5_dot_consec_word2vec.bin
+- positive_data_file:
+        path: "data/rt-polaritydata/rt-polarity_7Feb_w_kaggle_shuf.pos"
+  negative_data_file:
+        path: "data/rt-polaritydata/rt-polarity_7Feb_w_kaggle_shuf.neg"
+
+vim data_helpers_fix_embed.py
+- dot consec clean_str function
+- get_datasets_mrpolarity_pandas function (using pandas dataframe to retrieve data)
+
+
+===================================================================================================================================================
+
+model - /data/cnn-text-classification-tf/spamtest_yash/model_8Feb_1549613866 ->
+
+(file - all_comments_27Dec_1549613866_prediction) observations - 
+
+- very good quality spams caught
+- the probability is very much reflective of the 'spammyness' of the comment
+- however, bullying sentences are also caught (like 'this idiot') -- take call - whether to remove from kaggle import list
+
+===================================================================================================================================================
+
+model - /data/cnn-text-classification-tf/runs/1549626601
+
+changes as compared to model_8Feb_1549613866 - 
+- batch_dev_step -> calculating overall accuracy, not saving summary
+- batch_size - 256, dev_batch_size - 1024
+
+Vocabulary Size: 813196
+Train/Dev split: 210873/23430
+
+824 steps -> 1 epoch
+24 steps -> for dev 
+
+===================================================================================================================================================
+
+model - 1549631544 - 
+
+changes as compared to model_8Feb_1549626601 - 
+- batch_size", 64
+- evaluate_every", 1500,
+- checkpoint_every", 1500
+
+===================================================================================================================================================
+
+model - model_9Feb_1549721546 - 1549721546 -> 
+
+changes compared to 1549631544 - 
+- dev_sample_percentage", .05
+- evaluate_every", 500, checkpoint_every", 500
+- dev_step(x_dev, y_dev, writer=dev_summary_writer)
+  #batch_dev_step(x_dev, y_dev, writer=dev_summary_writer)
+config_fix_embed.yml
+- positive_data_file:
+  path: "data/rt-polaritydata/rt-polarity.pos"
+  
+  negative_data_file: 
+  path: "data/rt-polaritydata/rt-polarity.neg"
+
+===================================================================================================================================================
+
+model - 1549732509 - model_10Feb_1549732509 - 
+
+- changes as compared to 1549721546 - 
+to run for complete 200 epochs
+
+===================================================================================================================================================
+
+x_text len:  74732
+word2vec_vocab len:  697582
+word2vec_vocab len:  772314
+
+len vocab processor :  706397
+Vocabulary Size: 706397
+Train/Dev split: 70996/3736
+
+===================================================================================================================================================
+
+hindi fix embed - 1549804065 - model_11Feb_1549804065 - 
+
+Loading data...
+x_text len:  83819
+
+word2vec_vocab len:  297313
+word2vec_vocab len:  381132
+
+===================================================================================================================================================
+
+1549005018 - best eng cbow model (model_12Dec_1544432917) counterpart for pure hindi -  
+to be compared with fixed embed pure hindi one 1549804065
+
+===================================================================================================================================================
+
+vanilla dennybritz model - 
+
+running on hindi first - 1549963770 - was run till 7k iters - (approx 7 epochs)
+
+Vocabulary Size: 84518
+Train/Dev split: 75438/8381
+
+===================================================================================================================================================
+
+after changing l2_regularization from 0.0 to 1.0  ->
+
+model_1550038066 - running full (will run another model till the optimum number of epochs)
+
+model_1550044375 - run till 9k iters 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf/runs/1550044375/
+
+Vocabulary Size: 84518
+Train/Dev split: 75438/8381
+
+===================================================================================================================================================
+
+cahya pull request code - along with denny - 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1550051989/ - 
+
+Vocabulary Size: 84518
+Train/Dev split: 75438/8381
+
+============================================================
+
+10k iterations probably best - 
+above model run till 10k iterations - 1550209244
+
+===================================================================================================================================================
+
+pure hindi word2vec - 
+/data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin
+
+===================================================================================================================================================
+
+model - 1550222502 - with wor2vec - default vocab which is generated only from the polarity data files
+Vocabulary Size: 84518
+Train/Dev split: 75438/8381
+
+===================================================================================================================================================
+
+1549005018 - hindi counterpart of the currently best english cbow model (model_12Dec_1544432917)
+1550051989 - cahya - L2 and dropout
+1550209244 - same hyperparams as model 1550051989 but run till 10k iters
+1550222502 - model 1550051989 with extra word2vec model (default)
+1550222502_21k - 1550222502 model checkpoint at 21k iters
+
+===================================================================================================================================================
+
+run till 115 epochs - with updated hindi positive and negative polarity lists - with other hyperparams same as 1550222502 - 
+
+model_1550661292
+1550661292
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1550661292/frozen_model.pb
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1550661292
+
+===================================================================================================================================================
+
+new models - both completed on 24 Feb, 24 Feb ->
+200 epochs (~234000 steps) - 
+1550839851
+
+same data and hyperparams as 1550839851 but run for 20000 steps - 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1551015767/
+
+===================================================================================================================================================
+
+best hindi model till now - 1551015767
+
+===================================================================================================================================================
+
+started on 4 March - 4:45 PM - run till 20000 steps - 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1551698761/checkpoints/ - 
+above 1551015767 model with above data but embedding layer set to frozen and the vocab built from word2vec vocab 
+saved model location -
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1551698761_20k_frozen_emb
+
+===================================================================================================================================================
+
+started on 4 March - finished on 5 March - 1551704549 - run complete till 200 epochs - 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1551704549/checkpoints/model-232600
+same hyperparams as 1551698761
+saved model location -
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1551704549_frozen_emb
+
+===================================================================================================================================================
+
+started on 5 March - to run till 200 epochs - 
+1551790996 - 
+
+updated data files - 
+3407  - positive file - https://docs.google.com/spreadsheets/d/1u160zE4Tf1w3HxchjTynxWxGGj6snVTdRjK7sB9jqe4/edit#gid=1463928668
+79387 - negative file - https://docs.google.com/spreadsheets/d/1vdH6F-UdRGL2FahJDope10cv_2b2NmRbnceC7MQeF5k/edit#gid=826029495
+
+===================================================================================================================================================
+
+started on 6 March - 1551860056 - 
+
+same hyperparams as 1551790996 - but to run till 20k iters - 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1551860056/checkpoints/
+
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1551860056_6Mar_20k
+
+===================================================================================================================================================
+
+model_1551704549_frozen_emb     - was run till 200 epochs
+model_1551698761_20k_frozen_emb - run till 20k steps
+
+===================================================================================================================================================
+
+consolidated google sheet - hindi 1551015767 and english mixed 1544432917 -> NBT 1Jan - 31 Jan data -> 
+https://docs.google.com/spreadsheets/d/1LUojEiT159biIxmTlY9JtuYWjFXUvQsKMpbtKrz0t58/edit#gid=1799667793
+
+multiple hindi models compare - frozen embeds etc - 
+https://docs.google.com/spreadsheets/d/1gJRQ8dMMpraSKy9s_v6GwqnD7bGDBGjnbZNmL4SELJc/edit#gid=1720927455
+
+===================================================================================================================================================
+
+NBTO_6March_1551860056_prediction - 
+https://docs.google.com/spreadsheets/u/1/d/12m1aTZugolUWSZzwRnT_jWqH386fEn_lGsR71m4XO0I/edit?ouid=103544493991573539109&usp=sheets_home&ths=true
+
+===================================================================================================================================================
+
+data used for model - 1552221831 -> was run till 20k steps - 
+
+backup/rt-polarity-hindi_uniq_shuf.pos_backup_11March - 3402
+backup/rt-polarity-hindi_uniq_shuf.neg_backup_11March - 79310
+
+===================================================================================================================================================
+
+The data files were shuffled - 
+Model 1552289917 was run till 150k steps
+Model 1552370020 was run till 20k steps (as best identified from tensorboard)
+
+===================================================================================================================================================
+
+Model 1552478400 was run -> 13 March 
+Same hyperparams as above - 
+only change in text_cnn -> with pos_weight of 10 in loss function weighted_cross_entropy_with_logits
+model_1552478400_13Mar_weighted
+
+===================================================================================================================================================
+
+model 1552497139 was run -> on 13 March (oversampling)
+(positive data file was oversampled 12 times)
+
+pos data file - multiplied 12 times - shuffled 
+original text_cnn file
+
+model_1552497139_13Mar_overs
+
+===================================================================================================================================================
+
+as on 14 March - currently using - stable version - 1551860056 - for hindi 
+
+===================================================================================================================================================
+
+Vocabulary Size: 77107
+Train/Dev split: 71013/3737
+Load word2vec file /data/ourdata/ourdata10dec.clean.cbow.size300.win10.neg15.sample1e-5.min10.bin
+Writing to /data/cnn-text-classification-tf/runs/1553774543
+
+used not the latest english clean_str - 
+used clean_str_1544432917 function 
+and path: /data/ourdata/ourdata10dec.clean.cbow.size300.win10.neg15.sample1e-5.min10.bin
+
+model - 1553774543 - adding 18 split comments as suggested by gyan sir - run till 110k iters
+
+===================================================================================================================================================
+
+model 1553854145 -> above model 1553774543 run till 9900 iters
+/data/cnn-text-classification-tf/runs/1553854145/checkpoints/
+
+===================================================================================================================================================
+
+model -
+/data1/cnn-text-classification-tf/runs/1554366187/
+
+english trained model - 
+clean_str changes - html character entities removal, extra special characters removed, more than double consecutive occurrences to double occurrence, tokens with no alphabets removed
+frozen embeds, embed vocab with word2vec vocab
+
+the model was run till 23k iters
+
+/data1/cnn-text-classification-tf/saved_models/model_1554366187
+
+===================================================================================================================================================
+
+model -  /data1/cnn-text-classification-tf/runs/1554374248 - 
+
+saved model - /data1/cnn-text-classification-tf/saved_models/model_1554374248
+
+run till 26k iters
+
+in the above model 1554366187 - only change - 'text_cnn' used instead of using 'text_cnn_fix_embed'
+
+Loading data...
+x_text len:  74732
+word2vec_vocab len:  565305
+word2vec_vocab len:  640037
+WARNING:tensorflow:From train_full_embed_vocab.py:108: VocabularyProcessor.__init__ (from tensorflow.contrib.learn.python.learn.preprocessing.text) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use tensorflow/transform or tf.data.
+WARNING:tensorflow:From /usr/local/lib/python3.5/dist-packages/tensorflow/contrib/learn/python/learn/preprocessing/text.py:154: CategoricalVocabulary.__init__ (from tensorflow.contrib.learn.python.learn.preprocessing.categorical_vocabulary) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use tensorflow/transform or tf.data.
+len vocab processor :  572534
+Vocabulary Size: 572534
+Train/Dev split: 70996/3736
+
+Load word2vec file /data1/our_data/yash_work/english_word2vec/date_3April/eng_updated_min5_word2vec.bin
+
+===================================================================================================================================================
+
+model /data1/cnn-text-classification-tf/runs/1554448776 - 
+train.py
+embed vocab consists of only the training set vocab
+
+run till 23k iters
+
+Vocabulary Size: 64714
+Train/Dev split: 70996/3736
+2019-04-05 12:49:30.094554: I tensorflow/core/platform/
+
+Load word2vec file /data1/our_data/yash_work/english_word2vec/date_3April/eng_updated_min5_word2vec.bin
+
+===================================================================================================================================================
+
+Training Times - 
+
+with only training set vocab, trainable embeds - 
+1 min - 100
+
+with full vocab, trainable embeds - 
+1 min - 21
+
+with full vocab, non-trainable embeds - 
+1 min - 247
+
+===================================================================================================================================================
+
+Spam check improvements - 
+spam check - improvement - one identified and the other not - 2459121765 and 2459120282
+spam check - improvement - one identified and the other not - 2459449971 & 2459449523
+UsedId -> 663310336,661273964 most of the comments are SPAM type.(have a look)
+
+===================================================================================================================================================
+
+as on 14 March - currently using - stable version - 1551860056 - for hindi 
+
+===================================================================================================================================================
+
+model_weights_bilstm_w2v_en.h5, model_architecture_bilstm_w2v_en.json -> bilstm, english, updated clean_str (with html modifications) -  
+
+/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/gradients_impl.py:109: UserWarning: Converting sparse IndexedSlices to a dense Tensor with 167169600 elements. This may consume a large amount of memory.
+  num_elements)
+Train on 67258 samples, validate on 7474 samples
+
+lstm_train_generic.py
+word2vec_model_loc = '/data1/our_data/yash_work/english_word2vec/date_3April/eng_updated_min5.model'
+positive_examples_loc = "./data/rt-polarity_myt.pos"
+negative_examples_loc = "./data/rt-polarity_myt.neg"
+tokenizer_pickle_loc = 'saved_models/tokenizer_full_en.pickle'
+pad_max_len_pickle_loc = 'saved_models/sent_padding_max_len_en.pickle'
+model_weight_location = 'saved_models/model_weights_bilstm_w2v_en.h5'
+model_arch_location = 'saved_models/model_architecture_bilstm_w2v_en.json'
+clean_str_function = data_helpers.clean_str_updated
+
+num_epochs = 10
+
+===================================================================================================================================================
+
+model 1556885726 -> 200 epochs
+model_1556885726
+
+Vocabulary Size: 83098
+Train/Dev split: 74441/8271
+2019-05-03 17:45:19.882174: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-05-03 17:45:25.233839: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1432] Found device 0 with properties: 
+name: Tesla K80 major: 3 minor: 7 memoryClockRate(GHz): 0.8235
+pciBusID: 0000:05:00.0
+
+
+Writing to /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1556885726
+
+Load word2vec file /data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin
+
+positive_data_file: "data/rt-polaritydata/rt-polarity-hindi_uniq_1760_trim_shuf.pos"
+negative_data_file: "data/rt-polaritydata/rt-polarity-hindi_uniq_shuf.neg"
+
+data - google sheet - 
+spam_hindi_list_1760_mod
+
+===================================================================================================================================================
+
+model - 1557082220 -> 
+model_1557082220_20k
+
+(same as above 1556885726 but only till 20k iters) - 
+
+Writing to /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1557082220
+
+===================================================================================================================================================
+
+BiLSTM model - 
+
+word2vec_model_loc = 'models/pure_hindi_min5.model'
+#word2vec_model_loc = '/data1/our_data/yash_work/english_word2vec/date_3April/eng_updated_min5.model'
+#positive_examples_loc = "./data/rt-polarity-hindi_uniq_shuf.pos"
+positive_examples_loc = "./data/rt-polarity-hindi_uniq_1760_trim_shuf.pos"
+negative_examples_loc = "./data/rt-polarity-hindi_uniq_shuf.neg"
+#positive_examples_loc = "./data/rt-polarity_myt.pos"
+n#egative_examples_loc = "./data/rt-polarity_myt.neg"
+
+embed_size = 300
+
+tokenizer_pickle_loc = 'saved_models/tokenizer_full_hin_trim.pickle'
+pad_max_len_pickle_loc = 'saved_models/sent_padding_max_len_hin_trim.pickle'
+
+num_epochs = 10
+
+model_weight_location = 'saved_models/model_weights_bilstm_hin_trim.h5'
+model_arch_location = 'saved_models/model_architecture_bilstm_hin_trim.json'
+
+clean_str_function = data_helpers.clean_str_pure_hindi
+#clean_str_function = data_helpers.clean_str_updated
+
+===================================================================================================================================================
+
+file - all trimmed - doubtful ones removed - 3305 size - (b4 - 3402)
+/Users/yash.dalmia/spam_filter/jupyter_notebooks/data/rt-polarity-hindi_uniq_trim_doubt_not_kept_pos.csv
+
+file on server 172.24.61.119 ->
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/data/rt-polaritydata/rt-polarity-hindi_uniq_trim_doubt_not_kept_shuf.pos
+
+===================================================================================================================================================
+
+model 1557405756 -> 
+saved model -> model_1557405756_100_epoch
+
+positive_data_file:
+path: "data/rt-polaritydata/rt-polarity-hindi_uniq_trim_doubt_not_kept_shuf.pos"
+negative_data_file:
+path: "data/rt-polaritydata/rt-polarity-hindi_uniq_shuf.neg"
+/data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin
+
+num_epochs", 200
+
+
+Writing to /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1557405756
+
+Load word2vec file /data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin
+word2vec file has been loaded
+2019-05-09T18:12:43.382088: step 1, loss 27.9723, acc 0.046875, learning_rate 0.005
+2019-05-09T18:12:43.890058: step 2, loss 2.02749, acc 1, learning_rate 0.00499831
+
+===================================================================================================================================================
+
+results containing model_1551860056_6Mar_20k, model_1556885726, model_1557082220_20k -> 
+
+NBTO_2_3_4_May_predictionV2.csv -
+https://docs.google.com/spreadsheets/d/1nhIrp-SFopQf-L1_X6D_mxDPtVDnJygOiiS8bsIx2ts/edit#gid=127953290
+
+===================================================================================================================================================
+
+model_name = 'model_1551860056_6Mar_20k'
+and 
+model_name = 'model_1557405756_100_epoch'
+
+===================================================================================================================================================
+
+1551860056 vs 1557405756 - 
+old vs new
+
+8 May - 
+37 vs 31 out of 2851
+6/38 vs 3/32
+
+9 May - 
+62 vs 41
+4/62 vs 2/41
+
+NBTO_8_May_1551860056_1557405756_predictionV2 - 
+https://docs.google.com/spreadsheets/u/1/d/1rl8M8AEqM7kBlELHgL4iVLj7xgXI72zjz3zTT4JGCFc/edit?ouid=103544493991573539109&usp=sheets_home&ths=true
+
+NBTO_9_May_1551860056_1557405756_predictionV2 - 
+https://docs.google.com/spreadsheets/d/1NvniwZiDUfJTQ4NfCmfLqPB8yWpzqMngIRdOl4s36II/edit#gid=1795869902
+
+===================================================================================================================================================
+
+3256 rt-polarity-hindi_uniq_trim_doubt_not_kept_remApproxDup_pos.csv
+
+updated hindi spam files - 
+79247 data/rt-polaritydata/rt-polarity-hindi_uniq_off_words_new_added_shuf.neg
+3256 data/rt-polaritydata/rt-polarity-hindi_uniq_trim_doubt_not_kept_remApproxDup_shuf.pos
+
+===================================================================================================================================================
+
+model 1557492791 -> 
+
+positive_data_file:
+      path: "data/rt-polaritydata/rt-polarity-hindi_uniq_trim_doubt_not_kept_remApproxDup_shuf.pos"
+negative_data_file:
+      path: "data/rt-polaritydata/rt-polarity-hindi_uniq_off_words_new_added_shuf.neg"
+
+word2vec:
+    path: /data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin
+
+Vocabulary Size: 82822
+Train/Dev split: 74253/8250
+2019-05-10 18:23:04.865923: I tensorflow/
+
+Writing to /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1557492791
+
+frozen model saved at - 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1557492791
+
+RESULTS - 
+model_1551860056_6Mar_20k vs model_1557492791 - 
+old vs new
+8 May - 4/62 vs 6/62
+9 May - 6/37 vs 8/48
+
+===================================================================================================================================================
+
+model 1557741446 - to run till 20k iters - 
+saved model - model_1557741446_20k
+
+only positive data file change (length 7051 vs 3256 for older) and 20k iters to run wrt model 1557492791
+
+positive_data_file:
+	path: "data/rt-polaritydata/rt-polarity-hindi_uniq_trim_doubt_not_kept_remApproxDup_oriTrimKept_addedHamsWithOffensiveWordAttached_shuf.pos"
+negative_data_file:
+    path: "data/rt-polaritydata/rt-polarity-hindi_uniq_off_words_new_added_shuf.neg"
+
+Writing to /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1557741446
+
+===================================================================================================================================================
+
+BILSTM MODELS ->
+
+Bilstm - training on 172.24.82.73 - 
+log output - /opt/spam_nn_process/lstm_classifier/nohup_bilstm_hin_trimWithOri_attachOff_cWeight.out
+
+Also, POSITIVE_LABEL_VAL -> 1
+class_weight = {POSITIVE_LABEL_VAL: 50.,
+                NEGATIVE_LABEL_VAL: 1.}
+
+word2vec_model_loc = 'models/pure_hindi_min5.model'
+#word2vec_model_loc = '/data1/our_data/yash_work/english_word2vec/date_3April/eng_updated_min5.model'
+
+#positive_examples_loc = "./data/rt-polarity-hindi_proper_off_only_50.pos"
+#negative_examples_loc = "./data/rt-polarity-hindi_uniq_shuf.neg"
+positive_examples_loc = "./data/rt-polarity-hindi_uniq_trim_doubt_not_kept_remApproxDup_oriTrimKept_addedHamsWithOffensiveWordAttached_shuf.pos"
+negative_examples_loc = "./data/rt-polarity-hindi_uniq_off_words_new_added_shuf.neg"
+
+embed_size = 300
+num_epochs = 10
+
+model_weight_location = 'saved_models/model_weights_bilstm_hin_trimWithOri_attachOff_cWeight.h5'
+model_arch_location = 'saved_models/model_architecture_bilstm_hin_trimWithOri_attachOff_cWeight.json'
+
+tokenizer_pickle_loc = 'saved_models/tokenizer_full_hin_trimWithOri_attachOff_cWeight.pickle'
+pad_max_len_pickle_loc = 'saved_models/sent_padding_max_len_hin_trimWithOri_attachOff_cWeight.pickle'
+
+clean_str_function = data_helpers.clean_str_pure_hindi
+
+Train on 77668 samples, validate on 8630 samples
+
+saved model details - 
+/data1/yash_work/spam_nn_process/lstm_classifier/saved_models/model_hin_trimWithOri_attachOff_cWeight_13May
+
+===================================================================================================================================================
+
+Bilstm - training on 172.24.82.74 - 
+
+log output - /opt/spam_nn_process/lstm_classifier/nohup_bilstm_hin_trimWithOri_attachOff.out
+
+only difference with above - not using class_weight
+
+model_weight_location = 'saved_models/model_weights_bilstm_hin_trimWithOri_attachOff.h5'
+model_arch_location = 'saved_models/model_architecture_bilstm_hin_trimWithOri_attachOff.json'
+
+tokenizer_pickle_loc = 'saved_models/tokenizer_full_hin_trimWithOri_attachOff.pickle'
+pad_max_len_pickle_loc = 'saved_models/sent_padding_max_len_hin_trimWithOri_attachOff.pickle'
+
+saved model details - 
+/data1/yash_work/spam_nn_process/lstm_classifier/saved_models/model_hin_trimWithOri_attachOff_13May
+
+===================================================================================================================================================
+
+old vs 1557741446 vs bilstm_c (.5 threshold) vs bilstm without c (0.5 threshold)
+
+8 May - 
+62 vs 46 vs 175 vs 60
+
+9 May - 
+37 vs 28 vs 116 vs 34
+6 vs 2 vs 
+
+bilstm_c - seems to have incorrect class weights - we need more weights while calculating loss for negative class (we don't want misclassifications of hams to spams.. we don't care if the count of spam comment identified is less)
+
+===================================================================================================================================================
+
+old 1551860056 vs 1557741446 -> 
+
+8 May NBT data - 
+# of spam comments caught     - 62 vs 46
+# of wrongly identified spams - 4 vs 2
+accuracy of new model - 2/46 = 95.7 %
+https://docs.google.com/spreadsheets/d/12w2pmI6r0f8OepMrD13R8_lCcPQLcjx7-6RBGuvkqgo/edit#gid=726564208
+
+9 May NBT data - 
+# of spam comments caught     - 37 vs 28
+# of wrongly identified spams - 6 vs 2 
+accuracy of new model - 2/28 = 92.9 %
+https://docs.google.com/spreadsheets/d/1uJEDdX4pbh4_bKESHbDh65emklY0WrQJgrctRx5uvqc/edit#gid=1437947217
+
+%age of total comments identified as spam by model 1557741446 - 74/(2484+2851) ~ 1.4%
+
+===================================================================================================================================================
+
+
+old 1551860056 vs 1557741446 vs bilstm_c_correct (73) - 
+2 March - 
+6/37 vs 7/26 vs 4/29
+
+10_11_12_May - 
+vs vs 8/72
+
+NBTO_10_11_12_May_1551860056_1557741446_bilstm_c_correct_prediction - 
+https://docs.google.com/spreadsheets/d/1slrs3eWu9HCSaen76-X6K_dYf8ISPad453CrWHxU6RY/edit#gid=758970691
+
+===================================================================================================================================================
+
+model 1557837780 - to run till 20k iters - 
+
+Writing to /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1557837780
+
+positive_data_file: path: "data/rt-polaritydata/rt-polarity-hindi_uniq_trim_doubt_not_kept_remApproxDup_oriTrimKept_shuf.pos"
+negative_data_file: path: "data/rt-polaritydata/rt-polarity-hindi_uniq_off_words_new_added_shuf.neg"
+
+===================================================================================================================================================
+
+BiLstm with class weight  - training on 172.24.82.73 - 
+
+class_weight = {POSITIVE_LABEL_VAL: 1.,
+                NEGATIVE_LABEL_VAL: 20.}
+(means that negative label misclassification will be penalised twenty times during training in loss function)
+
+positive_examples_loc = "./data/rt-polarity-hindi_uniq_trim_doubt_not_kept_remApproxDup_oriTrimKept_shuf.pos"
+negative_examples_loc = "./data/rt-polarity-hindi_uniq_off_words_new_added_shuf.neg"
+
+embed_size = 300
+num_epochs = 10
+
+base_folder_loc = 'saved_models/model_hin_trimWithOri_cWeight_14May/'
+
+===================================================================================================================================================
+
+BiLstm without class weight  - training on 172.24.82.74 - same as above except no class weight - 
+
+positive_examples_loc = "./data/rt-polarity-hindi_uniq_trim_doubt_not_kept_remApproxDup_oriTrimKept_shuf.pos"
+negative_examples_loc = "./data/rt-polarity-hindi_uniq_off_words_new_added_shuf.neg"
+
+embed_size = 300
+num_epochs = 10
+
+base_folder_loc = 'saved_models/model_hin_trimWithOri_14May/'
+
+===================================================================================================================================================
+
+14-15 May NBT data - 
+model_1557837780_20k vs model_1551860056_6Mar_20k vs bilstm
+new vs old vs lstm
+17/85 vs 22/122 vs 13/71
+5/85
+
+===================================================================================================================================================
+
+13 May data - 
+model_1557837780_20k vs model_1551860056_6Mar_20k
+4/52 vs 6/68
+0/52
+
+===================================================================================================================================================
+
+spam sentences - 
+possible overfitting - fatti hai, saitan, katue
+mulle - not directly offensive
+
+===================================================================================================================================================
+
+server - 172.24.82.73
+location - /opt/spam_nn_process/lstm_classifier/saved_models/lstm_1558011454
+x = Embedding(max_words, embed_size, weights=[embedding_matrix], trainable=False)(inp)
+lstm_1558011454
+
+===================================================================================================================================================
+
+model 1558012024 - 
+CNN model
+train_w2v_vocab.py
+taken to include the w2v vocab in the embedding layer
+rest is the same as 1557837780 
+
+x_text len:  83298
+
+word2vec_vocab len:  297313
+word2vec_vocab len:  380611
+
+saved model and checkpoints folder - 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1558012024
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1558012024_20k
+
+===================================================================================================================================================
+

@@ -1,0 +1,79 @@
+
+from keras.models import model_from_json
+
+weight_loc = 'saved_models/model_weights_hin_10e_128f_oversample.h5'
+arch_loc = 'saved_models/model_architecture_hin_10e_128f_oversample.json'
+
+# load json and create model
+json_file = open(arch_loc, 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+loaded_model = model_from_json(loaded_model_json)
+# load weights into new model
+loaded_model.load_weights(weight_loc)
+print("Loaded model from disk")
+
+
+# evaluate loaded model on test data
+loaded_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+#score = loaded_model.evaluate(X, Y, verbose=0)
+#print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
+
+
+import data_helpers
+from gensim.models import Word2Vec
+
+def get_model_params():
+	sentences, labels = data_helpers.load_data_and_labels()
+	sequence_length = max(len(x) for x in sentences)
+	pre_trained_word2vec_model = Word2Vec.load('models/pure_hindi_min5.model')
+	#sentences_padded = data_helpers.pad_sentences(sentences, pad_length = sequence_length)
+	sentences_padded = data_helpers.pad_sentences(sentences)
+	vocabulary, vocabulary_inv = data_helpers.build_vocab(sentences_padded, pre_trained_word2vec_model)
+	return sequence_length, vocabulary, vocabulary_inv
+
+sequence_length, vocabulary, vocabulary_inv = get_model_params()
+
+
+
+#eval_set = [u'मुल्ले आतंकवादी है']
+eval_set = ['asdfasdf', 'ffdsafsdf']
+
+def get_input_ready_feed(eval_set):
+	eval_set = [s.strip() for s in eval_set]
+	eval_set = [data_helpers.clean_str_pure_hindi(sent) for sent in eval_set]
+	eval_set = [s.split(" ") for s in eval_set]
+	sentences = eval_set
+	padding_word="<PAD/>"
+	sentences_padded = data_helpers.pad_sentences(sentences, padding_word = padding_word, pad_length = sequence_length)
+	x, _ = data_helpers.build_input_data(sentences_padded, vocabulary, labels=None)
+	return x
+
+
+import pandas as pd
+
+df = pd.read_csv('testing_data/NBTO_28_Apr_1551860056_svm_prediction.csv')
+eval_set = df['C_T'].tolist()
+x = get_input_ready_feed(eval_set)
+
+keras_pred = loaded_model.predict(x)
+df['keras_pred'] = keras_pred
+
+df
+
+===================================================================================================================================================
+
+
+import pickle
+
+# saving
+with open('tokenizer.pickle', 'wb') as handle:
+    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+# loading
+with open('tokenizer.pickle', 'rb') as handle:
+    tokenizer = pickle.load(handle)
+
+
+===================================================================================================================================================
+

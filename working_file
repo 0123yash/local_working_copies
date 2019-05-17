@@ -1,0 +1,1284 @@
+
+==============================================================================================================================================
+
+Word2Vec - 
+to investigate - best tool is 'distance'
+takes a text corpus as input and gives vector representation of words as output (step - constructs a vocabulary from the training text file)
+two main learning algos - continuous bag of words, continuous skip grams
+word 2 phrases - pre-processing the training data
+word clustering can be done on top of word vector result
+
+
+Comment Text, Number of offensive markers, Prediction, Probability
+
+AC_O_C:>0
+
+http://192.168.36.98/mytimes/elasticCommentQuery?sort=desc&appKey=TOI,ET&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&queryString=_exists_:C_T AND AC_O_C:>0&sDateEpoch=1543775400000&eDateEpoch=1543861800000
+
+AC_O_C:>0
+
+http://192.168.36.98/mytimes/elasticCommentQuery?sort=desc&appKey=TOI,ET&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&queryString=_exists_:C_T%20AND%20AC_O_C:%3E0&sDateEpoch=1543775400000&eDateEpoch=1543861800000
+
+/data/cnn-text-classification-tf/spamtest_yash/model_29Nov_1543513239/off_count_3Dec_2.csv_prediction.csv
+
+API - changes - print probability, prediction, cleaned input string
+
+http://172.24.82.72/predict?cText=gaumutras%20women
+
+.env/bin/python3.6 .env/bin/pip
+
+==============================================================================================================================================
+
+Spam filter - 
+TODO - explore gensim - training - 
+explore lost information
+
+
+/data/cnn-text-classification-tf/spamtest_yash ->
+drwxr-xr-x  9 kapil.narang domain users  294 Nov 24 11:29 deploy_py
+drwxr-xr-x  2 kapil.narang domain users  208 Nov 24 11:44 __pycache__
+drwxr-xr-x  3 root         root          178 Dec  3 13:03 model_28Nov_1543421697
+drwxr-xr-x  2 root         root           88 Dec  3 15:03 model_29Nov_1543823896
+drwxr-xr-x  2 root         root           88 Dec  3 17:32 model_1543830594
+drwxr-xr-x 14 root         root         4096 Dec  5 11:56 backup_5Dec
+drwxr-xr-x  2 root         root          207 Dec  5 12:07 model_1543927514
+drwxr-xr-x  6 kapil.narang domain users  178 Dec  5 12:08 data_to_run
+drwxr-xr-x  3 root         root          310 Dec  5 12:15 model_29Nov_1543513239
+drwxr-xr-x  3 root         root           56 Dec  5 12:47 model_29Nov_1543513331
+
+model_29Nov_1543513331 - new pb file created on 5 Dec for the runs '1543513331'. it's vocab and pb file copied 
+
+model_29Nov_1543513239 - was most likely run on the runs '1543513331' and vocab and pb file was copied.
+(so results of both these outputs should be the same)
+
+==============================================================================================================================================
+
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_29Nov_1543513331/allComments_5Dec.csv_prediction.csv .
+
+==============================================================================================================================================
+
+filePath = "word2vec.model"
+model = Word2Vec.load(filePath)
+
+filePath = "ourdata.skip.size300.win10.neg15.sample1e-5.min15.bin"
+model = word2vec.Word2Vec.load_word2vec_format(filePath, binary= True)
+
+KeyedVectors.load_word2vec_format(filePath, binary = True)
+
+//from gensim.test.utils import common_texts, get_tmpfile
+from gensim.models import Word2Vec
+from gensim.models import KeyedVectors
+
+filePath = "ourdata.skip.size300.win10.neg15.sample1e-5.min15.bin"
+keyedVecData = KeyedVectors.load_word2vec_format(filePath, binary = True, unicode_errors='ignore')
+
+filePath = "mytimesvectors.kv"
+word_vectors = KeyedVectors.load(filePath, mmap='r')
+
+
+fname = get_tmpfile("mytimesvectors.kv")
+word_vectors.save(fname)
+
+word_vectors2 = KeyedVectors.load(fname, mmap='r')
+
+def most_similar_vec(str):
+	return word_vectors.most_similar(str)
+
+word_vectors.vocab["fuck"].count
+
+
+To get the most frequent words in the embedding -
+
+w2c = dict()
+for item in word_vectors.vocab:
+	w2c[item]=word_vectors.vocab[item].count
+
+a = sorted(w2c.items(), key=lambda x: x[1],reverse=True)
+
+
+Get the most similar words ->
+
+>>> from gensim.models import Word2Vec
+>>> from gensim.models import KeyedVectors
+
+>>> filePath = "mytimesvectors.kv"
+>>> word_vectors = KeyedVectors.load(filePath, mmap='r')
+>>> word_vectors.most_similar('bitch')
+
+current word2vec bin command - 
+nohup word2vec -train /data/ourdata/commentonly.csv -output /data/ourdata/ourdata.skip.size300.win10.neg15.sample1e-5.min15.bin -cbow 0 -size 300 -window 10 -negative 15 -hs 0 -sample 1e-5 -threads 24 -binary 1 -min-count 15 > out.log &
+
+
+==============================================================================================================================================
+
+word2vec training model - with same parameters as currently
+done - picking sentences on the fly - no load on RAM
+
+stopwords ? - same will have to be used 
+phrases ?   - ""
+
+==============================================================================================================================================
+
+172.24.61.119 - 
+/data/ourdata/yash_work/
+nohup python3 cleanCsvV2.py &
+
+wc -l /data/ourdata/yash_work/commentsonly_chunk_cleaned.csv
+
+==============================================================================================================================================
+
+nohup word2vec -train /data/ourdata/commentonly.csv -output /data/ourdata/ourdata.skip.size300.win10.neg15.sample1e-5.min15.bin -cbow 0 -size 300 -window 10 -negative 15 -hs 0 -sample 1e-5 -threads 24 -binary 1 -min-count 15 > out.log &
+
+ 
+Word2Vec(sentences=None, corpus_file=None, size=100, alpha=0.025, window=5, min_count=5, max_vocab_size=None, sample=0.001, seed=1, workers=3, min_alpha=0.0001, sg=0, hs=0, negative=5, ns_exponent=0.75, cbow_mean=1, hashfxn=<built-in function hash>, iter=5, null_word=0, trim_rule=None, sorted_vocab=1, batch_words=10000, compute_loss=False, callbacks=(), max_final_vocab=None)¶
+
+negative=5,
+
+
+model = Word2Vec(word2vec_feed, size=300, window=10, min_count=15, workers=24, negative=15, hs=0, sample=0.00001, sg=0)
+
+==============================================================================================================================================
+
+word2vec
+csvToCsv
+
+==============================================================================================================================================
+
+/data/ourdata/yash_work/commentsonly_chunk_cleaned.csv
+
+nohup word2vec -train /data/ourdata/commentonly.csv -output /data/ourdata/ourdata.skip.size300.win10.neg15.sample1e-5.min15.bin -cbow 0 -size 300 -window 10 -negative 15 -hs 0 -sample 1e-5 -threads 24 -binary 1 -min-count 15 > out.log &
+
+nohup word2vec -train /data/ourdata/commentsonly_chunk_cleaned.csv -output /data/ourdata/ourdata.cbow.size300.win10.neg15.sample1e-5.min15.bin -cbow 1 -size 300 -window 10 -negative 15 -hs 0 -sample 1e-5 -threads 24 -binary 1 -min-count 15 > out.log &
+
+nohup word2vec -train /data/ourdata/commentsonly_chunk_cleaned.csv -output /data/ourdata/ourdata.cleaned.cbow.size300.win10.neg15.sample1e-5.min15.bin -cbow 1 -size 300 -window 10 -negative 15 -hs 0 -sample 1e-5 -threads 24 -binary 1 -min-count 15 > out.log &
+
+==============================================================================================================================================
+
+to start a vector run in python shell - 
+
+cd /opt/spam_yash/
+source .env/bin/activate
+
+python
+
+>>> from gensim.models import Word2Vec
+>>> from gensim.models import KeyedVectors
+
+>>> file_path = "mytimesvectors.kv"
+>>> vec = KeyedVectors.load(file_path, mmap='r')
+
+>>> clean_file_path = "mytimesvectors_clean.kv"
+>>> clean_vec = KeyedVectors.load(clean_file_path, mmap='r')
+
+==============================================================================================================================================
+
+
+nohup word2vec -train /data/ourdata/commentsonly_chunk_cleaned.csv -output /data/ourdata/ourdata.cleaned.skip.size300.win10.neg15.sample1e-5.min15.bin -cbow 0 -size 300 -window 10 -negative 15 -hs 0 -sample 1e-5 -threads 24 -binary 1 -min-count 15 > out.log &
+
+
+scp yash.dalmia@172.24.61.119:/data/ourdata/ourdata.cleaned.cbow.size300.win10.neg15.sample1e-5.min15.bin .
+
+
+filePath = "ourdata.skip.size300.win10.neg15.sample1e-5.min15.bin"
+keyedVecData = KeyedVectors.load_word2vec_format(filePath, binary = True, unicode_errors='ignore')
+
+filePath = "mytimesvectors.kv"
+word_vectors = KeyedVectors.load(filePath, mmap='r')
+
+cd /opt/spam_yash/
+source .env/bin/activate
+
+python
+
+>>> from gensim.models import Word2Vec,KeyedVectors
+file_path = "ourdata10dec.clean.cbow.size300.win10.neg15.sample1e-5.min10.bin"
+cbow_vec = KeyedVectors.load_word2vec_format(file_path, binary = True)
+
+>>> file_path = "mytimesvectors.kv"
+>>> vec = KeyedVectors.load(file_path, mmap='r')
+
+>>> clean_file_path = "mytimesvectors_clean.kv"
+>>> clean_vec = KeyedVectors.load(clean_file_path, mmap='r')
+
+len(model.wv.vocab)
+model = Word2Vec.load(file_path)
+
+==============================================================================================================================================
+
+https://iksinc.online/tag/continuous-bag-of-words-cbow/
+http://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/
+
+1544121000000
+
+http://192.168.36.98/mytimes/elasticCommentQuery?sort=desc&appKey=TOI,ET&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&queryString=_exists_:C_T&sDateEpoch=1544034600000&eDateEpoch=1544121000000
+
+ourdata.cleaned.skip.size300.win10.neg15.sample1e-5.min15.bin
+
+filePath = "ourdata.cleaned.skip.size300.win10.neg15.sample1e-5.min15.bin"
+cleaned_skip_vec = KeyedVectors.load_word2vec_format(filePath, binary = True)
+
+
+mytimesvectors_clean_skip.kv
+
+
+file_path = "mytimesvectors.kv"
+vec = KeyedVectors.load(file_path, mmap='r')
+
+file_path = "mytimesvectors_clean.kv"
+clean_vec = KeyedVectors.load(file_path, mmap='r')
+
+file_path = "mytimesvectors_clean_skip.kv"
+clean_skip_vec = KeyedVectors.load(file_path, mmap='r')
+
+
+
+>>> def most_similar(word_vec, string1):
+...     return word_vec.most_similar(string1)
+... 
+
+==============================================================================================================================================
+
+Spam filter - 
+1544203136 - 7 Dec - latest model
+
+==============================================================================================================================================
+
+word2vec visualizer - 
+https://gist.github.com/BrikerMan/7bd4e4bd0a00ac9076986148afc06507
+
+https://www.kaggle.com/jagangupta/stop-the-s-toxic-comments-eda
+
+
+==============================================================================================================================================
+
+mytimes.sso.baseurl=http://jsso.indiatimes.com/sso
+url.sso.ticket.validation=https://jsso.indiatimes.com/sso/crossapp/identity/web/getSsecFromTicket
+jsso.profile.url=http://jssoprofile.indiatimes.com/sso
+sso.user.update=http://jsso.indiatimes.com/sso/UpdateIntegraUserProfile
+sso.user.alternateupdate=http://jsso.indiatimes.com/sso/UpdateUser
+
+==============================================================================================================================================
+
+python3 w2v_visualizer.py myt_comments.model visualize_result
+
+cd /data/ourdata/yash_work/visualize_tensor
+tensorboard --logdir=visualize_result
+
+/usr/bin/python3 /usr/local/bin/tensorboard --logdir /data/ourdata/yash_work/visualize_tensor/visualize_result2 &
+python3 tensorboard --logdir /data/ourdata/yash_work/visualize_tensor/visualize_result2 &
+
+==============================================================================================================================================
+
+mytimes.sso.baseurl=http://jsso.indiatimes.com/sso
+url.sso.ticket.validation=https://jsso.indiatimes.com/sso/crossapp/identity/web/getSsecFromTicket
+jsso.profile.url=http://jssoprofile.indiatimes.com/sso
+sso.user.update=http://jsso.indiatimes.com/sso/UpdateIntegraUserProfile
+sso.user.alternateupdate=http://jsso.indiatimes.com/sso/UpdateUser
+
+
+http://jsso.indiatimes.com/sso      ----         
+/GetImage?userid=&siteid=&ru=http://timesofindia.indiatimes.com/photo/12534017.cms
+/InsertImage
+/UpdateSSOUserProfile?siteid=&emailid=&firstname=&lastname=&city=
+
+http://jssoprofile.indiatimes.com/sso ------
+/GetXMLUserProfile?emailid=
+
+http://jsso.indiatimes.com/sso/UpdateIntegraUserProfile
+
+http://jsso.indiatimes.com/sso/UpdateUser
+
+
+==============================================================================================================================================
+
+Updating a user from sso - 
+http://172.29.16.120/mytimes/getUsersInfo?ssoids=8e34qgs1rjhp6lnggru04h1dg&uuId=8e34qgs1rjhp6lnggru04h1dg
+http://172.29.16.120/mytimes/getUsersInfo?ssoids=8e34qgs1rjhp6lnggru04h1dg&uuId=
+
+==============================================================================================================================================
+
+also showing probabilities of all the offensive comments -> which are not currently deleted - but marked offensive by at least a user
+give demo - to editors - indrajeet rai - under nalin
+
+==============================================================================================================================================
+
+ditch for now - kapil sir working on it - see word2vec - hindi characters
+
+cbow word2vec - recall increased, precision ? (approx same)
+compare gensim and google c created word2vec - python script - measure similarity and differences
+
+update moodel check API - with latest CBOW model 
+
+run on pos and neg data - cbow model 
+
+top priority - check mailers being sent, live integration of spam ML
+
+==============================================================================================================================================
+
+current mytimes errors - 
+Error in sending api: url::http://timesofindia.indiatimes.com/ratecomment_new.cms 
+json is of type error, message: com.til.cms.graph.read.exception.VertexNotFoundInGraphException: 67062474 to satisfy the query criteria.
+java.lang.ArrayIndexOutOfBoundsException Error in activity pickup for user 
+Error in sending api: url::http://rewards.indiatimes.com/bp/api/alog/al
+
+2000 hits / 15 minutes
+
+==============================================================================================================================================
+
+
+
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_12Dec_1544432917/allComments_12Dec_1544432917_prediction.csv .
+
+
+
+run cbow model on pos and neg data
+
+
+offensive flow - 
+
+
+rt-polarity.neg
+rt-polarity.pos
+
+
+
+current mytimes errors - 
+Error in sending api: url::http://timesofindia.indiatimes.com/ratecomment_new.cms 
+json is of type error, message: com.til.cms.graph.read.exception.VertexNotFoundInGraphException: 67062474 to satisfy the query criteria.
+java.lang.ArrayIndexOutOfBoundsException Error in activity pickup for user 
+Error in sending api: url::http://rewards.indiatimes.com/bp/api/alog/al
+
+2000 hits / 15 minutes
+
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_12Dec_1544432917/rt-polarity.neg_1544432917_prediction.csv .
+
+
+==============================================================================================================================================
+
+EOL vim problems - ^M - 
+
+https://stackoverflow.com/questions/811193/how-to-convert-the-m-linebreak-to-normal-linebreak-in-a-file-opened-in-vim
+
+First, use :set ff? to figure out the file format your file is.
+
+I guess it could be unix, then the problem is your file was created with fileformat=dos adding "^M^J" to the line end but read with flieformat=unix only removing the "^J" from the line end, leaving the "^M" there.
+
+Just input :e ++ff=dos in Vim command line to change your file's format from unix to dos. It should solve the problem. If not, :%s/\r//g should help you out.
+
+==============================================================================================================================================
+
+
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_1544203136/frozen_model.pb .
+
+nohup /opt/spamtest_yash/deploy_py/.env/bin/python3.6 /opt/spamtest_yash/deploy_py/.env/bin/gunicorn run_api_modifiedV2:app -b localhost:8000 &
+
+
+==============================================================================================================================================
+
+http://172.24.82.72/predict?cText=adsjklfsadjfkl%20pusssy%20gaumutra%20on%20the%20chainwax
+{
+"base_dir": "/opt/spamtest_yash/deploy_py/model_12Dec_1544432917/",
+"cText": "adsjklfsadjfkl pusssy gaumutra on the chainwax",
+"isSpam": true,
+"modified cText": "adsjklfsadjfkl pusssy gaumutra on the chainwax",
+"spam probability": "0.7630289"
+}
+
+==============================================================================================================================================
+
+Vishal Arora - chef process - webro servers ->
+
+Add property - 
+bookmark.activities.tobe.shown.for.days=30
+
+mailer.dynamic.fields.addition=
+mailer.dynamic.roaltdetail.fields.addition=url
+
+Edit properties - 
+mytimes.sso.baseurl=https://jsso.indiatimes.com/sso
+jsso.profile.url=https://jssoprofile.indiatimes.com/sso
+sso.user.update=https://jsso.indiatimes.com/sso/UpdateIntegraUserProfile
+sso.user.alternateupdate=https://jsso.indiatimes.com/sso/UpdateUser
+
+
+/opt/webro/webroConstants.properties - edit the below property ->
+sso.token.url=https://jsso.indiatimes.com/sso/crossdomain/genericLogin
+
+==============================================================================================================================================
+
+vocabulary processor hindi -> 
+https://github.com/tflearn/tflearn/issues/919
+
+vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
+
+def my_tokenizer_func(iterator):
+  return (x.split(" ") for x in iterator)
+
+vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length = max_document_length, tokenizer_fn = my_tokenizer_func)
+
+vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length=6, vocabulary=vocab, tokenizer_fn = my_func)
+
+==============================================================================================================================================
+
+live integration - 
+property configurable 
+
+==============================================================================================================================================
+
+C_APP_RES, DLT not exists query - killing mongo - do this in java instead - 
+ActivityMongoDataRepo.findCommetedActivityCountByMsId
+getCommentedActivityCountWithMultiAppkey
+
+==============================================================================================================================================
+
+only hindi chars left - 
+cleanCsvV2_hindi_test.py
+commentsonly_chunk_hindi_cleaned_pure.csv
+
+hindi chars and english related modifications - 
+cleanCsvV2_hindi.py
+commentsonly_chunk_hindi_cleaned.csv
+
+==============================================================================================================================================
+
+
+/data/ourdata/yash_work/commentsonly_chunk_hindi_cleaned_pure.csv
+
+commentsonly_chunk_hindi_cleaned.csv
+csvFilePath = "/data/ourdata/yash_work/commentsonly_chunk_hindi_cleaned.csv"
+
+
+
+
+embedding_name = cfg['word_embeddings']['default']
+
+initW = data_helpers.load_embedding_vectors_word2vec(vocabulary, cfg['word_embeddings']['word2vec']['path'], cfg['word_embeddings']['word2vec']['binary'])
+
+
+python w2v_visualizer.py word2vec.model visualize_result
+
+python w2v_visualizer.py hindi_comments_pure.model visualize_result_hindi
+
+
+https://tedboy.github.io/nlps/generated/generated/gensim.models.Word2Vec.save_word2vec_format.html
+
+==============================================================================================================================================
+
+
+done - share daily data
+done - make the google word2vec format gemsim model pure
+visualization of word2vec
+amit talk 
+
+==============================================================================================================================================
+
+from gensim.models import Word2Vec,KeyedVectors
+file_path = "hindi_comments_pure.model"
+model = Word2Vec.load(file_path)
+model.wv.save_word2vec_format("hindi_comments_pure_word2vec.bin",  binary=True)
+
+==============================================================================================================================================
+
+cleaning function part - in all 3 - word2vec, training, testing
+lllllll -> ll
+more prefilters that can be done
+
+==============================================================================================================================================
+
+run visualize when 119 server empty -
+cd /data/ourdata/yash_work/visualize_tensor
+python3 w2v_visualizer.py hindi_comments_pure_min10.model visualize_result_hindi_min10
+
+def multiple_chars(str1):
+    return re.sub(r'(\w)\1{2,}',r'\1\1', str1)
+
+==============================================================================================================================================
+
+/opt/spam_yash
+tensorboard --logdir=visualize_result_hindi
+
+==============================================================================================================================================
+
+https://medium.com/@camrongodbout/tensorflow-in-a-nutshell-part-one-basics-3f4403709c9d
+
+word cloud - hindi training data
+how to deal with combined hindi and english comments
+
+
+mytimes property added - 
+spam.check.ml.url=http://172.24.82.72/predict
+
+==============================================================================================================================================
+
+60825377, TOI
+
+TODO - some "rated" hardcoding to be removed , L1242 - "A_ID", "A_N" hardcoding
+
+==============================================================================================================================================
+
+
+
+add a model number - in json output
+write an object in the comment object IF the comment gets rejected - containing probability, model number, prediction
+mailer part - another mailer type - rajeev ?
+
+
+
+
+commented, replied, rated
+non-logged in and logged in
+
+
+
+non-logged in replied, rated -> 
+
+statisticHandler.updateStats(activity, parameterMap.get(BaseActivity.SHARED_VIA));
+distributerHandler.distribute(parameterMap, activity);
+
+handled at the top itself
+
+
+http://myt.indiatimes.com/mytimes/cms/add?cmsObjectDetail=<entity><msid>98997</msid><Mstype>2</Mstype><Mssubtype>0</Mssubtype><title>article good</title><uppdt_date>10/18/2016 12:36:06 PM</uppdt_date><appKey>TOI</appKey><synopsys>The new versions is rumoured to be ditching the USB Type-A port, leaving customers with USB Type-C and Thunderbolt 3 options.</synopsys><url>http://www.gadgetsnow.com//articleshow/54913099.cms</url><topicNames>ApApple laptops</topicNames><parentmsidlist>5880666</parentmsidlist></entity>
+
+
+http://mytest.indiatimes.com/mytimes/cms/add?cmsObjectDetail=<entity><msid>98997</msid><Mstype>2</Mstype><Mssubtype>0</Mssubtype><title>test commenting article</title><uppdt_date>10/18/2018 12:36:06 PM</uppdt_date><appKey>TOI</appKey><synopsys>The new versions is rumoured to be ditching the USB Type-A port, leaving customers with USB Type-C and Thunderbolt 3 options.</synopsys><url>http://www.gadgetsnow.com//articleshow/54913099.cms</url><topicNames>ApApple laptops</topicNames><parentmsidlist></parentmsidlist></entity>
+
+http://mytest.indiatimes.com/mytimes/cms/add?cmsObjectDetail=<entity><msid>60825377</msid><Mstype>2</Mstype><Mssubtype>0</Mssubtype><title>test commenting article</title><uppdt_date>10/18/2018 12:36:06 PM</uppdt_date><appKey>TOI</appKey><synopsys>An article for testing commmenting various functionalities like reply count , entity count, non-logged in comments, etc..</synopsys><url>http://www.gadgetsnow.com//articleshow/54913099.cms</url><topicNames>ApApple laptops</topicNames><parentmsidlist></parentmsidlist></entity>
+
+
+if (parameterMap.get(BaseActivity.COMMENT_TEXT) != null) {
+	activity.setCommentText(parameterMap.get(BaseActivity.COMMENT_TEXT));
+}
+
+==============================================================================================================================================
+
+/data/ourdata/yash_work/commentsonly_hindi_eng_cleaned_consec.csv
+
+scp yash.dalmia@172.24.61.119:/data/ourdata/yash_work/hindi_word2vec/gensim_model_hindi_2.py .
+
+==============================================================================================================================================
+
+http://commentmoderator.indiatimes.com/readers-opinion/getUserDetails?email=jitendra.verma@timesinternet.in
+
+http://commentmoderator.indiatimes.com/readers-opinion/createUser?role=ROLE_ADMIN&password=changeit&channelList=TOI&email=jitendra.verma@timesinternet.in
+
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_24Dec_1545383603/NBTO_1545244200000_108.csv_prediction.csv NBTO_1545244200000_108_1545383603_prediction.csv
+
+http://192.168.36.98/mytimes/elasticCommentQuery?sort=desc&appKey=TOI,ET&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&queryString=_exists_:C_T&sDateEpoch=1543775400000&eDateEpoch=1543861800000
+
+exact query - 
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=desc&appKey=NBTO&filterCommentStatus=REJECTED&queryString=ED_ID.keyword:satyakam.abhishek@timesinternet.in
+
+==============================================================================================================================================
+
+Retrieving editor marked NBTO - 
+
+satyakam.abhishek@timesinternet.in
+shivendra.suman@timesinternet.in
+rakesh.parmar@timesinternet.in
+nirendra.nagar@timesinternet.in
+
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=desc&appKey=NBTO&filterCommentStatus=REJECTED&queryString=ED_ID.keyword:satyakam.abhishek@timesinternet.in
+
+==============================================================================================================================================
+
+root      39868      1  0 Dec20 ?        00:07:13 /usr/bin/python3 /usr/local/bin/tensorboard --logdir=/data/ourdata/yash_work/visualize_tensor/visualize_result2
+root     122490      1  0 Dec24 ?        00:01:52 /usr/bin/python3 /usr/local/bin/tensorboard --logdir=/data/ourdata/yash_work/visualize_tensor/visualize_result_hindi_eng_consec_min10 --port=6007
+root     130635 130591 99 11:31 pts/0    00:01:52 python3 -u run_csv_prob_modifiedV2Hindi.py
+root     130890 130591  0 11:32 pts/0    00:00:00 grep python
+
+==============================================================================================================================================
+
+compare CBOW and new hindi and eng combined model - for 25 December data
+latin characters - escape, make the repeating characters generic
+
+==============================================================================================================================================
+
+\p{InBasic_Latin}: U+0000–U+007F
+
+
+do not replace with spaces - 
+\p{InLatin-1_Supplement}: U+0080–U+00FF
+\p{InLatin_Extended-A}: U+0100–U+017F
+\p{InLatin_Extended-B}: U+0180–U+024F
+\p{InLatin_Extended_Additional}: U+1E00–U+1EFF 
+
+make the repeating generic - 
+for all the characters
+
+
+changes in clean_str function - 
+addition in first sub line -
+re.sub(r"[^A-Za-z0-9(),!?\'\`*$@#\x80-\xFF\u0100-\u017F\u0180-\u024F\u1E00-\u1EFF\u0900\u0901\u0902\u0903\u0904\u09
+string = re.sub(r'(.)\1{2,}',r'\1\1', string)
+
+===================================================================================================================================================
+
+commentsonly_hindi_eng_cleaned_consec.csv -> got overwritten by mistake -> current clean_str but without latin inclusion in escape chars and only english chars multiple repeat corrected
+
+===================================================================================================================================================
+
+
+/data/ourdata/yash_work/commentsonly_hindi_eng_cleaned_dot_consec_latin.csv
+csvFilePath = "/data/ourdata/yash_work/commentsonly_hindi_eng_cleaned_dot_consec_latin.csv"
+hindi_eng_comments_min1_dot_consec_latin.model
+model.save("hindi_eng_comments_min1_dot_consec_latin.model")
+
+===================================================================================================================================================
+
+Properties to add in mytimes.properties - 
+
+spam.check.ml.enable=true
+spam.check.ml.url=http://172.24.82.72/predict
+
+===================================================================================================================================================
+
+commit id - containing D_U_P changes - af5433993140826b4aa569a818068906824abd02
+git log --until="2017-30-05" -- myTimes/src/main/java/com/times/mytimes/services/consumer/ConsumerService.java 
+
+===================================================================================================================================================
+
+mytest.indiatimes.com/mytimes/spamCheckML?cText=adsfasfd
+
+http://mytest.indiatimes.com/mytimes/commentIngestion/?objectType=B&activityType=Commented&appKey=TOI&uniqueAppID=60825377&exCommentTxt=gaumutras%20women 332423dsfs &baseEntityType=ARTICLE&ssoId=yash0210agrawal@gmail.com&userName=akash&eroaltdetails=<roaltdetails><fromaddress>yash0210agrawal@gmail.com</fromaddress><location>noida</location><fromname>ashish</fromname><loggedstatus>1</loggedstatus><ssoid>yash0210agrawal@gmail.com</ssoid></roaltdetails>&isCommentMigrate=true&uuId=85ijpvxmc5m92xxbgwq0p92mo&isCommentMailMigrate=true
+
+===================================================================================================================================================
+
+English only CBOW word2vec min10 - vocab count - 442636
+Eng Hindi CBOW word2vec min10  - vocab count -   626319
+Eng Hindi CBOW word2vec min1 - vocab count -    5729075
+
+===================================================================================================================================================
+
+from gensim.models import Word2Vec, KeyedVectors
+model_lat = Word2Vec.load("hindi_eng_comments_min1_dot_consec_latin.model")
+len(model_lat.wv.vocab)
+
+model_lat.wv.vocab['ass**'].count
+
+===================================================================================================================================================
+
+ending special characters can be truncated.. keep only the middling ones
+word2vec getting ruined - you??!
+
+http://172.24.82.72/predict?cText=you%20are%20a%20c*nt
+http://172.24.82.72/predict?cText=you%20are%20a%20cunnt
+
+===================================================================================================================================================
+
+freeze graph with embeds (word2vec)
+
+embedding/random_uniform/shape,embedding/random_uniform/min,embedding/random_uniform/max,embedding/random_uniform/RandomUniform,embedding/random_uniform/sub,embedding/random_uniform/mul,embedding/random_uniform,embedding/W,embedding/W/Assign,embedding/W/read,embedding/embedding_lookup/axis,embedding/embedding_lookup,embedding/embedding_lookup/Identity,embedding/ExpandDims/dim,embedding/ExpandDims,embedding/W/Adam/Initializer/zeros/shape_as_tensor,embedding/W/Adam/Initializer/zeros/Const,embedding/W/Adam/Initializer/zeros,embedding/W/Adam,embedding/W/Adam/Assign,embedding/W/Adam/read,embedding/W/Adam_1/Initializer/zeros/shape_as_tensor,embedding/W/Adam_1/Initializer/zeros/Const,embedding/W/Adam_1/Initializer/zeros,embedding/W/Adam_1,embedding/W/Adam_1/Assign,embedding/W/Adam_1/read,embedding/W_0/grad/hist/tag,embedding/W_0/grad/hist/strided_slice/stack,embedding/W_0/grad/hist/strided_slice/stack_1,embedding/W_0/grad/hist/strided_slice/stack_2,embedding/W_0/grad/hist/strided_slice,embedding/W_0/grad/hist/values,embedding/W_0/grad/hist,embedding/W_0/grad/sparsity/tags,embedding/W_0/grad/sparsity
+
+output_node_names = "output/predictions/dimension,output/predictions,embedding/random_uniform/shape,embedding/random_uniform/min,embedding/random_uniform/max,embedding/random_uniform/RandomUniform,embedding/random_uniform/sub,embedding/random_uniform/mul,embedding/random_uniform,embedding/W,embedding/W/Assign,embedding/W/read,embedding/embedding_lookup/axis,embedding/embedding_lookup,embedding/embedding_lookup/Identity,embedding/ExpandDims/dim,embedding/ExpandDims,embedding/W/Adam/Initializer/zeros/shape_as_tensor,embedding/W/Adam/Initializer/zeros/Const,embedding/W/Adam/Initializer/zeros,embedding/W/Adam,embedding/W/Adam/Assign,embedding/W/Adam/read,embedding/W/Adam_1/Initializer/zeros/shape_as_tensor,embedding/W/Adam_1/Initializer/zeros/Const,embedding/W/Adam_1/Initializer/zeros,embedding/W/Adam_1,embedding/W/Adam_1/Assign,embedding/W/Adam_1/read,embedding/W_0/grad/hist/tag,embedding/W_0/grad/hist/strided_slice/stack,embedding/W_0/grad/hist/strided_slice/stack_1,embedding/W_0/grad/hist/strided_slice/stack_2,embedding/W_0/grad/hist/strided_slice,embedding/W_0/grad/hist/values,embedding/W_0/grad/hist,embedding/W_0/grad/sparsity/tags,embedding/W_0/grad/sparsity"
+
+===================================================================================================================================================
+
+Vocab Transformation - 
+
+from tensorflow.contrib import learn
+import numpy as np
+import data_helpers
+
+
+base_dir = "/data/cnn-text-classification-tf/spamtest_yash/model_29Dec_1546000224/"
+vocab_path = base_dir + 'vocab'
+vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_path)
+
+x_raw = ['This is a cat','This must be boy', 'This is a a dog']
+x_raw = [data_helpers.clean_str(sent) for sent in x_raw]
+
+x_test = np.array(list(vocab_processor.transform(x_raw)))
+x_test
+
+vocab_dict = vocab_processor.vocabulary_._mapping
+
+#to get the index in the vocab mapping
+vocab_dict['this']
+len(vocab_dict)
+
+sorted_vocab = sorted(vocab_dict.items(), key = lambda x : x[1])
+
+
+len(vocab_dict)     - 67932
+len(model_kv.vocab) - 501086
+
+===================================================================================================================================================
+
+to commment multiple lines in vim file - 
+
+:5,17s/^/#/ 
+
+Shuffle the file - 
+cat logfile.txt | shuf > logfile2.txt
+
+===================================================================================================================================================
+
+
+from tensorflow.contrib import learn
+vocab_path = "/data/cnn-text-classification-tf/spamtest_yash/model_12Dec_1544432917/vocab"
+vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_path)
+print("vocab_processor len : " , len(vocab_processor.vocabulary_._mapping))
+
+
+word2vec_wv = KeyedVectors.load_word2vec_format("/data/ourdata/ourdata10dec.clean.cbow.size300.win10.neg15.sample1e-5.min10.bin", binary=True)
+word2vec_vocab = set(list(word2vec_wv.vocab.keys()))
+
+
+
+http://commentmoderator.indiatimes.com/readers-opinion/createUser?role=ROLE_ADMIN&password=changeit&channelList=TOI,NBTO,ET,NGSBLOG,MTO,NPRS,MM,BM,AM,Travel,CRIC,TELGU,FMI,ETH,PG,ETG,IEX,ES,IV,NGS,GTech,TAMIL,BI,TR,MALAY,LIFEH,BT,GIZ,PM,ZT,TFOOD,TIMESB,ETBLOG,NBTB,MALB,TAMB,TELB,MTB,ESB,VKB,NBTRB,FEMB,TOIRB,MFB,TJ&email=Prabhakar.jha@timesinternet.in
+
+http://commentmoderator.indiatimes.com/readers-opinion/getUserDetails?email=yash16@timesinternet.in
+
+
+===================================================================================================================================================
+
+>>> vocab_path_1 = "/data/cnn-text-classification-tf/runs/1546251097/vocab"
+>>> vocab_processor_1 = learn.preprocessing.VocabularyProcessor.restore(vocab_path_1)
+>>> print("vocab_processor_1 len : " , len(vocab_processor_1.vocabulary_._mapping))
+vocab_processor_1 len :  366953
+>>> 
+>>> vocab_path_2 = "/data/cnn-text-classification-tf/runs/1546336299/vocab"
+>>> vocab_processor_2 = learn.preprocessing.VocabularyProcessor.restore(vocab_path_2)
+>>> print("vocab_processor_2 len : " , len(vocab_processor_2.vocabulary_._mapping))
+vocab_processor_2 len :  377686
+
+===================================================================================================================================================
+
+cat /data/cnn-text-classification-tf/spamtest_yash/model_12Dec_1544432917/all_comments_27Dec.csv_prediction.csv | grep ",0," | wc -l
+cat /data/cnn-text-classification-tf/spamtest_yash/model_1Jan_1546251097/all_comments_27Dec.csv_prediction.csv | grep ",0," | wc -l
+cat /data/cnn-text-classification-tf/spamtest_yash/model_1Jan_1546336299_allEmbed/all_comments_27Dec.csv_prediction.csv | grep ",0," | wc -l
+cat /data/cnn-text-classification-tf/spamtest_yash/model_1Jan_1546251097_17k_iters/all_comments_27Dec.csv_prediction.csv | grep ",0," | wc -l
+
+===================================================================================================================================================
+
+For mytimes code part - 
+after mailer configurable - mytimes code 
+all other actions testing - on 120 server
+
+multi-server python API - 
+pycharm project - API runnning scripts
+kapil sir - sent library version scripts
+
+===================================================================================================================================================
+
+call the mailer function with passed activity Id before returning the addAnActivity function before the TP, mobile notifs calls
+
+
+===================================================================================================================================================
+
+after mailer configurable - mytimes code 
+all other actions testing - on 120 server
+
+
+
+http://172.29.16.120/mytimes/addActivity?actorType=U&objectType=A&activityType=Disagreed&objectId=1686745&uuId=85ijpvxmc5m92xxbgwq0p92mo
+
+http://myt.indiatimes.com/mytimes/addActivity?actorType=U&objectType=A&activityType=Agreed&objectId=1702753&uuId=85ijpvxmc5m92xxbgwq0p92mo
+
+http://myt.indiatimes.com/mytimes/addActivity?actorType=U&activityType=Offensive&objectId=2086177155&offenText=Inciting hatred against a certain community&objectType=A&fromMyTimes=true&uuId=6tjuqkyrcz5qpwyuw7z3w5vue&isCommentMigrate=true
+
+
+comment posting ->
+172.29.16.120/mytimes/commentIngestion/?objectType=B&activityType=Commented&appKey=TOI&uniqueAppID=64790901&exCommentTxt=test comment by test user&baseEntityType=ARTICLE&ssoId=yash1995@dispostable.com&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash1995@dispostable.com</fromaddress><location>noida</location><fromname>ashish</fromname><loggedstatus>1</loggedstatus><ssoid>yash1995@dispostable.com</ssoid></roaltdetails>&isCommentMigrate=true&uuId=7wusc5a3r474ko63wjlgdppkn&isCommentMailMigrate=true
+
+reply posting ->
+172.29.16.120/mytimes/commentIngestion/?objectType=A&activityType=Replied&appKey=TOI&uniqueAppID=64790901&exCommentTxt=test gaumutras women&baseEntityType=ARTICLE&ssoId=yash1996@dispostable.com&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash1996@dispostable.com</fromaddress><location>noida</location><fromname>yash</fromname><loggedstatus>1</loggedstatus><ssoid>b35w7qh09av1pdqy29vm8h98a</ssoid></roaltdetails>&isCommentMigrate=true&commentRootId=2453720960&isCommentMailMigrate=true&uuId=b35w7qh09av1pdqy29vm8h98a
+
+non-logged in comment posting ->
+172.29.16.120/mytimes/commentIngestion/?objectType=B&activityType=Commented&appKey=TOI&uniqueAppID=64790901&exCommentTxt=non logged in test comment bruh&baseEntityType=ARTICLE&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash2003@dispostable.com</fromaddress><location>noida</location><fromname>yash</fromname><loggedstatus>0</loggedstatus><ssoid></ssoid></roaltdetails>&isCommentMigrate=true&isCommentMailMigrate=true
+
+non-logged in reply posting ->
+172.29.16.120/mytimes/commentIngestion/?objectType=A&activityType=Replied&appKey=TOI&uniqueAppID=64790901&exCommentTxt=non logged in reply testing&baseEntityType=ARTICLE&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash2004@dispostable.com</fromaddress><location>noida</location><fromname>yash</fromname><loggedstatus>0</loggedstatus><ssoid></ssoid></roaltdetails>&isCommentMigrate=true&isCommentMailMigrate=true&commentRootId=2453720959
+
+
+===================================================================================================================================================
+
+share healthcheck URL
+uWSGI listens on 5000 port - change in app.py for route
+nginx - 80 port
+
+===================================================================================================================================================
+
+git clone - deep_learning - 
+git clone https://yash_dalmia@bitbucket.org/times_internet/deep_learning.git deploy
+
+in deploy folder, 
+python3.6 -m venv .env
+source .env/bin/activate
+pip install -r pip_req.txt 
+
+===================================================================================================================================================
+
+https://docs.python.org/2/howto/logging.html
+
+
+Deprecated functions in python file to remove - 
+01/07/2019 05:45:18 PM: WARNING: From app.py:82: FastGFile.__init__ (from tensorflow.python.platform.gfile) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.gfile.GFile.
+
+
+
+01/07/2019 05:46:17 PM: WARNING: From /opt/test_spam_ml_2/deploy/.env/lib64/python3.6/site-packages/tensorflow/contrib/learn/python/learn/preprocessing/text.py:203: tokenizer (from tensorflow.contrib.learn.python.learn.preprocessing.text) is deprecated and will be removed in a future version.
+Instructions for updating:
+
+===================================================================================================================================================
+
+
+http://172.29.16.120/mytimes/addActivity?actorType=U&objectType=A&activityType=Disagreed&objectId=1686745&uuId=85ijpvxmc5m92xxbgwq0p92mo
+
+http://myt.indiatimes.com/mytimes/addActivity?actorType=U&objectType=A&activityType=Agreed&objectId=1702753&uuId=85ijpvxmc5m92xxbgwq0p92mo
+
+http://myt.indiatimes.com/mytimes/addActivity?actorType=U&activityType=Offensive&objectId=2086177155&offenText=Inciting hatred against a certain community&objectType=A&fromMyTimes=true&uuId=6tjuqkyrcz5qpwyuw7z3w5vue&isCommentMigrate=true
+
+
+comment posting ->
+172.29.16.120/mytimes/commentIngestion/?objectType=B&activityType=Commented&appKey=TOI&uniqueAppID=64790901&exCommentTxt=test comment by test user&baseEntityType=ARTICLE&ssoId=yash1995@dispostable.com&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash1995@dispostable.com</fromaddress><location>noida</location><fromname>ashish</fromname><loggedstatus>1</loggedstatus><ssoid>yash1995@dispostable.com</ssoid></roaltdetails>&isCommentMigrate=true&uuId=7wusc5a3r474ko63wjlgdppkn&isCommentMailMigrate=true
+
+reply posting ->
+172.29.16.120/mytimes/commentIngestion/?objectType=A&activityType=Replied&appKey=TOI&uniqueAppID=64790901&exCommentTxt=test gaumutras women&baseEntityType=ARTICLE&ssoId=yash1996@dispostable.com&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash1996@dispostable.com</fromaddress><location>noida</location><fromname>yash</fromname><loggedstatus>1</loggedstatus><ssoid>b35w7qh09av1pdqy29vm8h98a</ssoid></roaltdetails>&isCommentMigrate=true&commentRootId=2453720960&isCommentMailMigrate=true&uuId=b35w7qh09av1pdqy29vm8h98a
+
+non-logged in comment posting ->
+172.29.16.120/mytimes/commentIngestion/?objectType=B&activityType=Commented&appKey=TOI&uniqueAppID=64790901&exCommentTxt=non logged in test comment bruh&baseEntityType=ARTICLE&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash2003@dispostable.com</fromaddress><location>noida</location><fromname>yash</fromname><loggedstatus>0</loggedstatus><ssoid></ssoid></roaltdetails>&isCommentMigrate=true&isCommentMailMigrate=true
+
+non-logged in reply posting ->
+172.29.16.120/mytimes/commentIngestion/?objectType=A&activityType=Replied&appKey=TOI&uniqueAppID=64790901&exCommentTxt=non logged in reply testing&baseEntityType=ARTICLE&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash2004@dispostable.com</fromaddress><location>noida</location><fromname>yash</fromname><loggedstatus>0</loggedstatus><ssoid></ssoid></roaltdetails>&isCommentMigrate=true&isCommentMailMigrate=true&commentRootId=2453720959
+
+
+172.29.16.120/mytimes/commentDeletionMail?commentActivityId=2453720960
+
+===================================================================================================================================================
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_ranges_2
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-range-query.html
+
+need to verify the reason - 
+spam - gaumutras%20women
+non spam - gaumutras%20women%20asfd%20by%20test%20user%20geuinefs%20comment
+
+===================================================================================================================================================
+
+to restart supervisor - 
+supervisorctl restart deep_learning
+
+/usr/bin/python /usr/bin/supervisord -n -c /etc/supervisord.conf
+vim /etc/supervisord.d/deep_learning.conf 
+
+supervisor command - 
+/opt/virtualenvs/deep_learning/bin/uwsgi --ini /opt/bin/deep_learning.ini 
+
+
+
+/var/log/deep_learning.log 
+/var/log/deep_learningerror.log 
+
+
+Timeout changed from 300 to 10 - 
+/opt/bin/deep_learning.ini 
+
+config file - 
+vim /opt/spam_ml/config.ini
+
+working by python sheel - not working by supervisor - 
+/opt/virtualenvs/deep_learning/bin/python /opt/deep_learning/app.py
+
+===================================================================================================================================================
+
+no space - 
+SPAM_VAL.round_prob:<=0.04 OR SPAM_VAL.round_prob:>=0.04
+
+SPAM_VAL.round_prob 
+
+===================================================================================================================================================
+
+Please copy the config file and the model folder from the reference server to the new server as discussed.
+
+SPAM_VAL.prob
+
+nohup .env/bin/gunicorn app:app -b localhost:8000 &
+
+spam.check.ml.enable=true
+spam.check.ml.url=http://172.24.82.72/predict
+
+
+mytest.indiatimes.com/mytimes/commentIngestion/?objectType=B&activityType=Commented&appKey=TOI&uniqueAppID=64790901&exCommentTxt=test comment 2 by test user&baseEntityType=ARTICLE&ssoId=yash1995@dispostable.com&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash1995@dispostable.com</fromaddress><location>noida</location><fromname>ashish</fromname><loggedstatus>1</loggedstatus><ssoid>yash1995@dispostable.com</ssoid></roaltdetails>&isCommentMigrate=true&uuId=7wusc5a3r474ko63wjlgdppkn&isCommentMailMigrate=true
+
+
+172.29.16.120/mytimes/commentIngestion/?objectType=B&activityType=Commented&appKey=TOI&uniqueAppID=64790901&exCommentTxt=test comment by test user genuine bruh&baseEntityType=ARTICLE&ssoId=yash1995@dispostable.com&userName=yash&eroaltdetails=<roaltdetails><fromaddress>yash1995@dispostable.com</fromaddress><location>noida</location><fromname>ashish</fromname><loggedstatus>1</loggedstatus><ssoid>yash1995@dispostable.com</ssoid></roaltdetails>&isCommentMigrate=true&uuId=7wusc5a3r474ko63wjlgdppkn&isCommentMailMigrate=true
+
+SPAM_VAL.round_prob 
+
+===================================================================================================================================================
+
+done - set timeout - spam ml check API - mytimes code
+done - elastic search controller - range query - spam probability
+done - internal VIP - mytd.indiatimes.com
+
+===================================================================================================================================================
+
+done - 1 waala use - case
+done - no need - verify encoding CText 
+
+
+done - mailer
+done - elastic controller - 1 prob check
+done - angular - all select check
+done - timeout check
+
+===================================================================================================================================================
+
+
+https://stackoverflow.com/questions/33759623/tensorflow-how-to-save-restore-a-model
+https://www.tensorflow.org/api_docs/python/tf/train/Saver
+
+===================================================================================================================================================
+
+Done in the last fiscal -
+
+Comment Moderator Angular application live
+CNN spam filter improvements - like word cloud, tensorboard visualization, CBOW word2vec, issues identification
+CNN spam filter - serving python API and live integration with mytimes
+GDPR compliance related requirements
+Migration of all processes to jenkins - final testing left
+Hardcoding removal from mytimes - channel creation related
+Editor comment reapproved functionality
+
+===================================================================================================================================================
+
+14 Jan - 
+Roadmap -
+
+Spam filter improvements
+Productisation
+
+
+http://172.29.93.37/predict?cText=dafjlasdkf
+172.24.80.67,172.24.80.65,172.24.80.66
+
+===================================================================================================================================================
+
+14 Jan - 
+Current mytimes issues - 
+
+duplicate upvote count increase upon hit from front-end
+the API hit from frontend not checking for duplicate upvote/downvote activity from user 
+parentCommentId and objectId param - if 'objectId' param present, then, the activity is checked for duplicate but not in case of parentCommentId
+
+===================================================================================================================================================
+
+current upvote API being hit from frontend - not being checked for duplicate - 
+https://myt.indiatimes.com/mytimes/addActivity?appKey=TOI&parentCommentId=2458704182&activityType=Agreed&baseEntityType=ARTICLE&objectType=A&url=https%3A%2F%2Ftimesofindia.indiatimes.com%2Fet-testing-purpose%2Farticleshow%2F59248285.cms%3Fupcache%3D2
+
+Correct upvote API - 
+http://172.29.16.120/mytimes/addActivity?actorType=U&objectType=A&activityType=Disagreed&objectId=2458703964&uuId=940ha228mqr84p7alrhypf8u0
+
+===================================================================================================================================================
+
+Mail things to test - to durgesh/priyanka in mytimes
+Test the elastic controller yourself on webro and deploy on comment moderator
+
+===================================================================================================================================================
+
+Some comments possibly escaping the spam filter check possibly due to no appkey passed - eg. 2458762431
+
+19490268-INFO : com.times.mytimes.services.consumer.ConsumerService - parameterMap appkey : null
+19490356:INFO : com.times.mytimes.services.consumer.ConsumerService - isSpamCommentByMLProcess for activity by actor Id 267340175 : null
+
+===================================================================================================================================================
+
+change 0.5 to 0.6 - for rejection of a comment (change in ini files of the python servers) and in angular application (change the unsure and spam ranges)
+
+===================================================================================================================================================
+
+TODO - 
+deploy the new mytimes code - after merging with webro_next
+deploy the new angular code - change the env property if required
+
+
+angular - sso - page reload after waiting for a while
+
+===================================================================================================================================================
+
+As deployed - mytimes war on webro servers - 
+
+webro_next -> to be deployed on webro servers 
+webro_live -> currently live on webro servers 
+
+angular war on webro servers - 
+master - currently live on webro servers 
+working_yash - to be deployed on webro servers
+
+external_comment_batch - 
+webro_live - currently live on new servers
+webro_next - to be deployed
+
+===================================================================================================================================================
+
+Things left in angular - 
+Editor marking details on comment object - on purge and approve/disagree
+
+env.js -> moderation threshold has been set to 0.49999999
+
+===================================================================================================================================================
+
+to get aggregate result- 
+
+https://www.browserling.com/tools/remove-all-whitespace
+https://www.freeformatter.com/java-dotnet-escape.html#ad-output
+
+curl -X POST http://172.29.114.130:9200/commentsdata-*/comment/_search --data "{\"size\":0,\"query\":{\"bool\":{\"must\":[{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}},{\"range\":{\"C_D\":{\"gte\":1547449974546,\"lte\":1547536374546,\"format\":\"epoch_millis\"}}}],\"must_not\":[]}},\"_source\":{\"excludes\":[]},\"aggs\":{\"3\":{\"terms\":{\"field\":\"C_APP_RES\",\"size\":20,\"order\":{\"_count\":\"desc\"}}}}}"
+
+===================================================================================================================================================
+
+mytimes code - 
+comment_elastic branch - comment text check added. so, error trace is not logged if the activity id passed doesn't contain comment text
+
+===================================================================================================================================================
+
+from 1 Nov, 2018 till 13 Jan
+
+
+grep counts of - 
+cat /opt/tomcat8/logs/catalina.out
+
+Some problem for comment Id 
+Done for comment Id 
+
+cat /opt/tomcat8/logs/catalina.out | grep "Done for comment Id" | wc -l
+cat /opt/tomcat8/logs/catalina.out | grep "Some problem for comment Id" | wc -l
+
+192.168.36.98/batchMyTimes/triggerUpdatingSpamObjInCommentsBatch
+
+===================================================================================================================================================
+
+To see how much batch process done - 
+
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=asc&appKey=TOI,NBTO,ET,NGSBLOG,MTO,NPRS,Test,MM,BM,AM,Travel,CRIC,TELGU,FMI,ETH,PG,ETG,IEX,ES,IV,NGS,GTech,TAMIL,BI,TR,MALAY,LIFEH,BT,GIZ,PM,ZT,TFOOD,mdfkfkf,TIMESB,ETBLOG,NBTB,MALB,TAMB,TELB,MTB,ESB,VKB,NBTRB,FEMB,TOIRB,MFB,TJC,MYT_COMMENTS_API_KEY,ETR,MXP,ETT,MKYRA,TILC,Gaana,ZEX,ETHFI,iDiva,MB,NBTBU,MYTIMES,EA,CMSA,TOIBLOG,QNAZ,ETBFSI,ZW,itimes,NPRSS,ETPB,QNA,ETHC,HEALTHB,FMF,ST,LUXP,KS,ETCIO,HMP,TMC,FEMINA,TD,TBNET,ETA,HTFOOD,ETE,AdAge,ELE,TS&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&eDate=13%2F1%2F2019&probabilityRange=0.0,0.49999999,0.5,1.0&from=0&size=50&queryString=(NOT%20c_id:%202435691292)%20AND%20(NOT%20c_id:%202436351060)
+
+===================================================================================================================================================
+
+Missing comments from elastic consumer - verify
+give stats of rejection 
+run over whole data
+
+missing comments from the batch process
+
+===================================================================================================================================================
+
+angular application ->
+/opt/webro/angular_app/env.js 
+vim /opt/tomcat8/webapps/comment-moderator/env.js
+
+===================================================================================================================================================
+
+run with minute timeout, mytimes code changes
+grep "Exception in readJsonFromUrl for requestBody :"
+
+handle for socket timeouts
+
+===================================================================================================================================================
+
+TODO - comment mod interface -> actor Id query -> include A_ID query - 'F_ADD' field is not present in some comments
+(maybe also reverse)
+
+done - TODO - rated activities without C_T also running spam ML process
+
+done - TODO - properties mail and deploy on consumer
+
+===================================================================================================================================================
+
+http://172.29.16.120/mytimes/addActivity?activityType=Commented&appKey=TOI&uniqueAppID=59421059&baseEntityType=MOVIEW_REVIEW&objectType=B&url=http://recipes.timesofindia.com/recipes/indian-style-vegetable-macaroni/rs53683561.cms&userrating=5&exCommentTxt=&uuId=85ijpvxmc5m92xxbgwq0p92mo
+
+
+http://172.29.16.120/mytimes/addActivity?activityType=Rated&appKey=TOI&uniqueAppID=59421059&baseEntityType=MOVIEW_REVIEW&objectType=B&url=http://recipes.timesofindia.com/recipes/indian-style-vegetable-macaroni/rs53683561.cms&userrating=5&exCommentTxt=&uuId=85ijpvxmc5m92xxbgwq0p92mo
+
+
+http://172.29.16.120/mytimes/addActivity?activityType=Rated&appKey=TOI&uniqueAppID=59421059&baseEntityType=MOVIEW_REVIEW&objectType=B&url=http://recipes.timesofindia.com/recipes/indian-style-vegetable-macaroni/rs53683561.cms&userrating=5&exCommentTxt=1&uuId=85ijpvxmc5m92xxbgwq0p92mo
+
+errors on deployed consumer - 
+http://agilogs.indiatimes.com/app/kibana#/discover?_g=()&_a=(columns:!(source_host,message),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'mytimestomcat-*',key:source_host,negate:!f,value:mytimapp43239),query:(match:(source_host:(query:mytimapp43239,type:phrase))))),index:'mytimestomcat-*',interval:auto,query:(query_string:(analyze_wildcard:!t,query:'*')),sort:!('@timestamp',desc))
+
+===================================================================================================================================================
+
+
+scp yash.dalmia@172.29.61.119/data/cnn-text-classification-tf/spamtest_yash/model_12Dec_1544432917/all_comments_25Dec.csv_prediction.csv all_comments_25Dec_prediction_1544432917.csv
+
+mv all_comments_25Dec.csv_prediction_vocab.csv all_comments_25Dec.csv_prediction_vocab_1544432917.csv
+
+12 Dec CBOW model - 535 spams identified 
+after vocab manipulation of input string - 644 spams identified
+
+
+===================================================================================================================================================
+
+model.wv.save_word2vec_format("hindi_pure_word2vec.bin",  binary=True)
+
+===================================================================================================================================================
+
+def clean_str_pure_hindi(string):
+    """ 
+    Tokenization/string cleaning for all datasets except for SST.
+    Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
+    """
+    string = re.sub(r"[^\u0900\u0901\u0902\u0903\u0904\u0905\u0906\u0907\u0908\u0909\u090a\u090b\u090c\u090d\u090e\u090f\u0910\u0911\u0912\u0913\u0914\u0915\u0916\u0917\u0918\u0919\u091a\u091b\u091c\u091d\u091e\u091f\u0920\u0921\u0922\u0923\u0924\u0925\u0926\u0927\u0928\u0929\u092a\u092b\u092c\u092d\u092e\u092f\u0930\u0931\u0932\u0933\u0934\u0935\u0936\u0937\u0938\u0939\u093a\u093b\u093c\u093d\u093e\u093f\u0940\u0941\u0942\u0943\u0944\u0945\u0946\u0947\u0948\u0949\u094a\u094b\u094c\u094d\u094e\u094f\u0950\u0951\u0952\u0953\u0954\u0955\u0956\u0957\u0958\u0959\u095a\u095b\u095c\u095d\u095e\u095f\u0960\u0961\u0962\u0963\u0964\u0965\u0966\u0967\u0968\u0969\u096a\u096b\u096c\u096d\u096e\u096f\u0970\u0971\u0972\u0973\u0974\u0975\u0976\u0977\u0978\u0979\u097a\u097b\u097c\u097d\u097e\u097f]", " ", string)
+
+    string = re.sub(r"\s{2,}", " ", string)
+    return string.strip()
+
+
+
+/data/ourdata/yash_work/hindi_word2vec/pure_hindi/cleanCsv_pure_hindi.py
+/data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin
+
+
+path: /data/cnn-text-classification-tf/data/rt-polaritydata/rt-polarity-hindi_uniq_shuf.neg
+path: /data/cnn-text-classification-tf/data/rt-polaritydata/rt-polarity-hindi_uniq_shuf.pos
+
+model location - /data/cnn-text-classification-tf/runs/1549005018/
+
+===================================================================================================================================================
+
+Python APIs - Spam filter ML API check - 
+Servers - 172.24.80.65, 172.24.80.66, 172.24.80.67
+VIP - 172.29.93.37
+Internal domain - mytd.indiatimes.com
+
+staging/ internal testing python ML spam check API setup - 
+http://172.24.82.72/predict?cText=gaumutras%20women
+
+===================================================================================================================================================
+
+Amit changes - 
+comment_moderator - 
+comModP2
+
+myTimes - 
+comment_mod_actor_id_search
+
+===================================================================================================================================================
+
+TODO - 
+done - run the pure hindi trained model - on various datasets
+test if the SPAM_VAL marking live process is working perfectly - some comments missed the SPAM_VAL filter
+retrieve the deleted comments stats for the last week (to be shared with ramji)
+verify - if setup function working correctly - vocab processor issue
+
+===================================================================================================================================================
+
+Predictions on negative data (ham) by the new pure hindi model 1549005018 - 
+Spams identified -> 8 / 80326
+
+
+Predictions on positive data (spam) by the new pure hindi model 1549005018 - 
+Spams identified -> 3437 / 3493     (incorrectly identified - 56/3493)
+
+===================================================================================================================================================
+
+from gensim.models import Word2Vec
+model = Word2Vec.load("models/eng_comments_min5_dot_consec.model")
+
+===================================================================================================================================================
+
+TODO - 
+hindi spam list - update - retrieve editor marked comments last weeks - > 25 December
+learning from ham,spam, nbt comments - data -> update
+january - ET - data
+test the keras trained model accuracy against the latest CBOW model
+
+===================================================================================================================================================
+
+TODO - 
+hindi improvements think
+hindi lucene tokenizer
+
+===================================================================================================================================================
+
+Mytimes Functionalities  - 
+
+1) Entity (article) needs to be added in mytimes before any activity is added
+2) Comment Ingestion - 
+   Logged in comment posting - SSO Id of the logged in user is required
+   Non-logged In comment posting - user name and email Id are required (comment is made live after verification through email)
+   Reply activity - reply on a comment or on another reply (logged in as well as non-logged in replies are allowed)
+3) Logged in comments are approved by default. These can be rejected through an API. The rejected comments are not visible in the comment feed. Non-logged in comments are rejected by default. These get approved if the user verifies the email id using the verification mail.
+4) Comment feed based on a given article Id and channel name can be retrieved through an API
+5) Functionality to agree or disagree a comment by a logged in user
+6) Offensive marking by an end user for a comment. The offensive marked comments automatically get rejected if the number of offensive markers reaches a threshold (currently 10).
+
+https://docs.google.com/document/u/1/d/103AM4ex6fPUkQQ6BrLjFCnhU_9QLaAuDGLHVd9Z_EkA/edit
+
+===================================================================================================================================================
+
+to copy the 10k iters cahya model - 
+scp yash.dalmia@172.24.61.119:/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1550209244/NBTO_1545244200000_108.csv_prediction.csv NBTO_1545244200000_108_1550209244_prediction.csv
+
+spam filter -> marked but not deleted, not marked 
+
+jenkins - 
+additional property change - 
+newrelic.monitoring.recipientMails=yash.dalmia@timesinternet.in,pradip.hatwar@timesinternet.in,kapil.narang@timesinternet.in,amit.goel@timesinternet.in
+
+===================================================================================================================================================
+
+9 SPAM_VAL misses (even with TOI appkey and field C_T) since 1 Jan, 2019
+isSpam true but NOT C_APP_RES:ML_PROCESS -> multiple - due to other rejection processes
+
+===================================================================================================================================================
+
+Offensive NBT functionality replication - 
+editor needs to select 'approved' and 'offensive' -> can take action non-offensive or reject
+non-offensive button - to be shown always, reject button - to be shown if at least one of the  selected comments is approved
+
+===================================================================================================================================================
+
+Ditch for now - 
+positive hindi set - 
+https://docs.google.com/spreadsheets/d/14LnTRaKOrJ92NkoWAw9fBqtshkGh6NXtH5ASGomh1Jg/edit#gid=0
+
+negative hindi set - 
+https://docs.google.com/spreadsheets/d/1qfZDHA1-e-ZuwxMhkg11-KTAQJUfYuYe6sQq9yJwfIs/edit#gid=0
+
+===================================================================================================================================================
+
+mytimes - branch - to continue from - (to be sent in next master - no urgency)
+sms_comment_batch_fix
+
+===================================================================================================================================================
+
+c_id missing spam_val - TOI - 25 Feb - 
+
+2,473,537,157
+2,473,537,133
+2,473,537,405
+2,473,537,338
+
+===================================================================================================================================================
+
+update entity from graph - 
+http://192.168.42.194/mytimes/updateEntityFromGraph?appkey=ES&msid=68319723&toTakeAction=false
+
+http://myt.indiatimes.com/mytimes/entity?msid=68319723&appKey=ES
+
+===================================================================================================================================================
+
+Goa trip - 
+net ticket investment - 19300 (including the cancellation mishap - 3900)
+
+===================================================================================================================================================
+
+comment moderator improvements - 
+
+Spam check improvements -  
+spam check - improvement - one identified and the other not - 2459121765 and 2459120282
+spam check - improvement - one identified and the other not - 2459449971 & 2459449523
+UsedId -> 663310336,661273964 most of the comments are SPAM type.(have a look)
+
+duplicate comments - ET ->
+user id - parambir2011@gmail.com
+
+===================================================================================================================================================
+
+A_D_N - to be made analyzable
+

@@ -1,0 +1,88 @@
+http://192.168.42.96:5601 ->
+
+GET _search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "A_K:TOI AND NOT A_ID:0",
+            "analyze_wildcard": true
+          }
+        },
+        {
+          "range": {
+            "C_D": {
+              "lt": 1551354248006,
+              "format": "epoch_millis"
+            }
+          }
+        }
+      ],
+      "must_not": []
+    }
+  },
+  "_source": {
+    "excludes": []
+  },
+  "aggs": {
+    "2": {
+      "terms": {
+        "field": "A_ID",
+        "size": 45,
+        "order": {
+          "_count": "desc"
+        },
+        "min_doc_count": 25
+      }
+    }
+  }
+}
+
+
+http://172.29.16.100:5601 ->
+
+GET _search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "A_K:TOI AND SPAM_VAL.isSpam:true AND NOT A_ID:0",
+            "analyze_wildcard": true
+          }
+        },
+        {
+          "range": {
+            "C_D": {
+              "gte": 1550749448006,
+              "lte": 1551354248006,
+              "format": "epoch_millis"
+            }
+          }
+        }
+      ],
+      "must_not": []
+    }
+  },
+  "_source": {
+    "excludes": []
+  },
+  "aggs": {
+    "2": {
+      "terms": {
+        "field": "A_ID",
+        "size": 45,
+        "order": {
+          "_count": "desc"
+        },
+        "min_doc_count": 25
+      }
+    }
+  }
+}
+

@@ -1,0 +1,1487 @@
+
+spam/ total comments on the given dates - 
+
+18 Jan 2019 - 430/13068
+19 Jan 2019 - 531/16948
+20 Jan 2019 - 549/15817
+
+===================================================================================================================================================
+
+http://mytest.indiatimes.com/mytimes/getFeed/Activity?msid=36783573&curpg=1&appkey=ET&sortcriteria=CreationDate&order=asc&size=100&pagenum=1&withReward=false
+
+http://mytest.indiatimes.com/mytimes/updateSpamMLObjForComment?commentId=1705502
+
+http://mytest.indiatimes.com/mytimes/addActivity?actorId=yash0210agrawal%40gmail.com&actorType=U&activityType=Commented&exType=comment&objectId=1705502&objectType=A&exCommentTxt=adsf%201%20111good%2520detailed%2520article%2520on%2520hackathon..%2520like%2520it%202&uuId=eizcfg607g4azlpsoufjvjc4s
+
+http://mytest.indiatimes.com/mytimes/commentIngestion/?objectType=B&activityType=Commented&appKey=ET&uniqueAppID=36783573&exCommentTxt=dsf%2011%20test%20comment%20by%20test%20user%20genui1ne%20bruh&baseEntityType=ARTICLE&ssoId=yash1995@dispostable.com&userName=yash&eroaltdetails=%3Croaltdetails%3E%3Cfromaddress%3Eyash1995@dispostable.com%3C/fromaddress%3E%3Clocation%3Enoida%3C/location%3E%3Cfromname%3Eashish%3C/fromname%3E%3Cloggedstatus%3E1%3C/loggedstatus%3E%3Cssoid%3Eyash1995@dispostable.com%3C/ssoid%3E%3C/roaltdetails%3E&isCommentMigrate=true&uuId=7wusc5a3r474ko63wjlgdppkn&isCommentMailMigrate=true
+
+===================================================================================================================================================
+
+kibana query - c_id> last process id -> 
+
+c_id:>1745123706 AND A_K:TOI AND _exists_:C_T AND NOT _exists_:SPAM_VAL
+
+===================================================================================================================================================
+
+kibana - should return no results after 3:05 PM - 23 Jan - 
+NOT _exists_:C_T AND _exists_:SPAM_VAL
+A_K:TOI AND _exists_:C_T AND NOT _exists_:SPAM_VAL
+
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=desc&appKey=TOI,NBTO,ET,NGSBLOG,MTO,NPRS,Test,MM,BM,AM,Travel,CRIC,TELGU,FMI,ETH,PG,ETG,IEX,ES,IV,NGS,GTech,TAMIL,BI,TR,MALAY,LIFEH,BT,GIZ,PM,ZT,TFOOD,mdfkfkf,TIMESB,ETBLOG,NBTB,MALB,TAMB,TELB,MTB,ESB,VKB,NBTRB,FEMB,TOIRB,MFB,TJC,MYT_COMMENTS_API_KEY,ETR,MXP,ETT,MKYRA,TILC,Gaana,ZEX,ETHFI,iDiva,MB,NBTBU,MYTIMES,EA,CMSA,TOIBLOG,QNAZ,ETBFSI,ZW,itimes,NPRSS,ETPB,QNA,ETHC,HEALTHB,FMF,ST,LUXP,KS,ETCIO,HMP,TMC,FEMINA,TD,TBNET,ETA,HTFOOD,ETE,AdAge,ELE,TS&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&sDateEpoch=1548236206106&eDateEpoch=1548248117781&from=0&size=50&queryString=A_K:TOI AND _exists_:C_T AND NOT _exists_:SPAM_VAL
+
+===================================================================================================================================================
+
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_1Feb_1549005018/frozen_model.pb .
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_1Feb_1549005018/vocab .
+
+model_1Feb_1549005018
+ModelFolderLocation = /opt/test_spam_ml/spam_ml_frozen_models/model_1Feb_1549005018
+
+
+
+clean_str_pure_hindi
+x_in = [data_helpers.clean_str_pure_hindi(x) for x in x_in_raw]
+
+
+
+/data/cnn-text-classification-tf/spamtest_yash/saved_checkpoints/model_1Feb_pure_hindi_1549005018_39k_iters/
+
+
+spamtest_yash/saved_checkpoints/model_1Feb_pure_hindi_1549005018_39k_iters/checkpoints/
+
+
+/data/cnn-text-classification-tf/spamtest_yash/model_1Feb_1549005018_39k_iters/
+
+
+spamtest_yash/model_1Feb_1549005018_39k_iters/rt-polarity-hindi_uniq_shuf.neg_prediction.csv
+
+
+/data/ourdata/yash_work/english_cleaned/eng_comments_min5_dot_consec_word2vec.bin
+
+
+scp yash.dalmia@172.24.61.119:/data/ourdata/yash_work/english_cleaned/eng_comments_min5_dot_consec.model* .
+
+models/eng_comments_min5_dot_consec.model
+
+
+from gensim.models import Word2Vec
+model = Word2Vec.load("models/eng_comments_min5_dot_consec.model")
+
+
+===================================================================================================================================================
+
+Saving and loading the keras models - 
+
+# Save the weights
+model.save_weights('model_weights.h5')
+
+# Save the model architecture
+with open('model_architecture.json', 'w') as f:
+    f.write(model.to_json())
+
+
+
+from keras.models import model_from_json
+# Model reconstruction from JSON file
+with open('model_architecture.json', 'r') as f:
+    model = model_from_json(f.read())
+
+# Load weights into the new model
+model.load_weights('model_weights.h5')
+
+model.summary()
+
+from keras.utils.vis_utils import plot_model
+plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
+
+
+===================================================================================================================================================
+
+import data_helpers
+from gensim.models import Word2Vec
+pre_trained_word2vec_model = Word2Vec.load('models/eng_comments_min5_dot_consec.model')
+
+x, y, vocabulary, vocabulary_inv_list = data_helpers.load_data(word2vec_model = pre_trained_word2vec_model)
+
+def pad_sentences(sentences, padding_word="<PAD/>", sequence_length=757):
+    """ 
+    Pads all sentences to the same length. The length is defined by the longest sentence.
+    Returns padded sentences.
+    """
+    #sequence_length = max(len(x) for x in sentences)
+    #sequence_length = 757
+    
+    padded_sentences = []
+    for i in range(len(sentences)):
+        sentence = sentences[i]
+        num_padding = sequence_length - len(sentence)
+        new_sentence = sentence + [padding_word] * num_padding
+        padded_sentences.append(new_sentence)
+    return padded_sentences
+
+
+def sentence_to_input(text):
+	x_text = [text]
+	return array_to_input(x_text)
+
+def array_to_input(x_text):
+	PADDING_WORD = '<PAD/>'
+	x_text = [s.strip() for s in x_text]
+	x_text = [data_helpers.clean_str(sent) for sent in x_text]
+	x_text = [s.split(" ") for s in x_text]
+	sentences = pad_sentences(x_text, padding_word=PADDING_WORD)
+	x = np.array([[vocabulary[word] if word in vocabulary else vocabulary[PADDING_WORD] for word in sentence] for sentence in sentences])
+	return x
+
+def spam_prob(model, text):
+	return model.predict(sentence_to_input(text))[0][0]
+
+===================================================================================================================================================
+
+embedding_layer = model.get_layer("embedding")
+embedding_layer.get_weights()[0]
+
+===================================================================================================================================================
+
+best english model till now - 
+accuracy validation - 0.98 (train - 1)
+loss validation     - 0.08 (train - 10-6)
+
+===================================================================================================================================================
+
+To check the left ET data - (total": part of this response)
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=desc&appKey=ET&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&sDate=1%2F1%2F2019&eDate=31%2F1%2F2019&from=0&size=50&queryString=NOT%20_exists_:SPAM_VAL
+
+===================================================================================================================================================
+
+https://datascience.stackexchange.com/questions/13490/how-to-set-class-weights-for-imbalanced-classes-in-keras
+
+loss_weights -> in loss function keras
+additional metrics - to print in val_accuracy
+
+bidirectional LSTM - basically anything in kaggle competition
+
+===================================================================================================================================================
+
+
+from keras.models import model_from_json
+# Model reconstruction from JSON file
+with open('saved_models/model_architecture.json', 'r') as f:
+    model = model_from_json(f.read())
+
+# Load weights into the new model
+model.load_weights('saved_models/model_weights.h5')
+
+
+
+import data_helpers
+import numpy as np
+from gensim.models import Word2Vec
+
+pre_trained_word2vec_model = Word2Vec.load('models/eng_comments_min5_dot_consec.model')
+
+x, y, vocabulary, vocabulary_inv_list = data_helpers.load_data(word2vec_model = pre_trained_word2vec_model)
+
+def pad_sentences(sentences, padding_word="<PAD/>", sequence_length=757):
+    """ 
+    Pads all sentences to the same length. The length is defined by the longest sentence.
+    Returns padded sentences.
+    """
+    #sequence_length = max(len(x) for x in sentences)
+    #sequence_length = 757
+    
+    padded_sentences = []
+    for i in range(len(sentences)):
+        sentence = sentences[i]
+        num_padding = sequence_length - len(sentence)
+        new_sentence = sentence + [padding_word] * num_padding
+        padded_sentences.append(new_sentence)
+    return padded_sentences
+
+
+def sentence_to_input(text):
+    x_text = [text]
+    return array_to_input(x_text)
+
+def array_to_input(x_text):
+    PADDING_WORD = '<PAD/>'
+    x_text = [s.strip() for s in x_text]
+    x_text = [data_helpers.clean_str(sent) for sent in x_text]
+    x_text = [s.split(" ") for s in x_text]
+    sentences = pad_sentences(x_text, padding_word=PADDING_WORD)
+    x = np.array([[vocabulary[word] if word in vocabulary else vocabulary[PADDING_WORD] for word in sentence] for sentence in sentences])
+    return x
+
+def spam_prob(model, text):
+    return model.predict(sentence_to_input(text))[0][0]
+
+
+negative_examples = list(open("./data/rt-polarity_myt.neg", "r", encoding="utf-8").readlines())
+sum([x[0]>0.5 for x in model.predict(array_to_input(negative_examples))])
+
+positive_examples = list(open("./data/rt-polarity_myt.pos", "r", encoding="utf-8").readlines())
+sum([x[1]>0.5 for x in model.predict(array_to_input(positive_examples))])
+
+
+model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+
+
+
+https://datascience.stackexchange.com/questions/13490/how-to-set-class-weights-for-imbalanced-classes-in-keras
+
+
+keras.layers.Dense
+
+
+
+
+
+Train on 67258 samples, validate on 7474 samples
+Epoch 1/100
+ - 87s - loss: 0.8150 - acc: 0.9489 - val_loss: 0.7785 - val_acc: 0.9517
+Epoch 2/100
+ - 86s - loss: 0.8146 - acc: 0.9495 - val_loss: 0.7785 - val_acc: 0.9517
+Epoch 3/100
+ - 86s - loss: 0.8146 - acc: 0.9495 - val_loss: 0.7785 - val_acc: 0.9517
+Epoch 4/100
+ - 85s - loss: 0.8146 - acc: 0.9495 - val_loss: 0.7785 - val_acc: 0.9517
+Epoch 5/100
+ - 85s - loss: 0.8146 - acc: 0.9495 - val_loss: 0.7785 - val_acc: 0.9517
+Epoch 6/100
+ - 85s - loss: 0.8146 - acc: 0.9495 - val_loss: 0.7785 - val_acc: 0.9517
+Epoch 7/100
+ - 85s - loss: 0.8146 - acc: 0.9495 - val_loss: 0.7785 - val_acc: 0.9517
+
+
+EVEN with 2 classes in output - with sigmoid applied - 
+
+Epoch 1/100
+ - 87s - loss: 0.8104 - acc: 0.9489 - val_loss: 0.7743 - val_acc: 0.9517
+Epoch 2/100
+ - 85s - loss: 0.8101 - acc: 0.9495 - val_loss: 0.7743 - val_acc: 0.9517
+Epoch 3/100
+ - 85s - loss: 0.8101 - acc: 0.9495 - val_loss: 0.7743 - val_acc: 0.9517
+Epoch 4/100
+ - 85s - loss: 0.8101 - acc: 0.9495 - val_loss: 0.7743 - val_acc: 0.9517
+Epoch 5/100
+ - 85s - loss: 0.8101 - acc: 0.9495 - val_loss: 0.7743 - val_acc: 0.9517
+Epoch 6/100
+
+
+model.predict(array_to_input(negative_examples))
+array([[0.9131362 , 0.08580667],
+       [0.91387504, 0.07915314],
+       [0.9735435 , 0.02456878],
+       ...,
+
+===================================================================================================================================================
+
+https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/kernels
+
+bidirectional lstm - 
+https://www.kaggle.com/eashish/bidirectional-gru-with-convolution
+
+===================================================================================================================================================
+
+changes in the latest run file - 
+dense 2 units
+global max pooling instead of max pooling (size = 2)
+
+model weights at saved_models/model_weights_100_f100_d2.h5
+model architecture at saved_models/model_architecture_100_f100_d2.json
+
+===================================================================================================================================================
+
+LSTM - prediction
+#Loading model weights
+model.load_weights(filepath)
+print('Predicting....')
+y_pred = model.predict(x_test,batch_size=1024,verbose=1)
+
+===================================================================================================================================================
+
+partial spammer using latin variants in english for offensive words - 
+A_ID: 548141459
+
+clean_str ->
+direct replace some of the most obvious latin ones
+go through the clean_str modifications again - '?' - doubtful -> maybe some advanced filter (not considering the special chars if at the end)
+
+word2vec - why special characters are present which should not be like '"' and "'"
+
+===================================================================================================================================================
+
+8 February - 
+
+All the changes in fix_embed model (using kaggle included dataset, frozen embedding layer) - 
+
+word2vec of vocab - taken input from config file word2vec location
+get_datasets_mrpolarity function modified for kaggle dataset
+
+vim train_fix_embed.py 
+- dev sample perc - 0.10 instead of 0.05
+- config_fix_embed.yml
+- data_helpers.get_datasets_mrpolarity_pandas function called
+- word2vec_wv = KeyedVectors.load_word2vec_format(cfg['word_embeddings']['word2vec']['path'], binary=True)
+- import data_helpers_fix_embed as data_helpers
+- from text_cnn_fix_embed import TextCNN
+
+vim train_fix_embedV2.py 
+- all the changes of train_fix_embed.py
+- batch_dev_step function instead of dev_step function
+
+vim config_fix_embed.yml
+- path: /data/ourdata/yash_work/english_cleaned/eng_comments_min5_dot_consec_word2vec.bin
+- positive_data_file:
+        path: "data/rt-polaritydata/rt-polarity_7Feb_w_kaggle_shuf.pos"
+  negative_data_file:
+        path: "data/rt-polaritydata/rt-polarity_7Feb_w_kaggle_shuf.neg"
+
+vim data_helpers_fix_embed.py
+- dot consec clean_str function
+- get_datasets_mrpolarity_pandas function (using pandas dataframe to retrieve data)
+
+
+===================================================================================================================================================
+
+model - /data/cnn-text-classification-tf/spamtest_yash/model_8Feb_1549613866 ->
+
+(file - all_comments_27Dec_1549613866_prediction) observations - 
+
+- very good quality spams caught
+- the probability is very much reflective of the 'spammyness' of the comment
+- however, bullying sentences are also caught (like 'this idiot') -- take call - whether to remove from kaggle import list
+
+===================================================================================================================================================
+
+model - /data/cnn-text-classification-tf/runs/1549626601
+
+changes as compared to model_8Feb_1549613866 - 
+- batch_dev_step -> calculating overall accuracy, not saving summary
+- batch_size - 256, dev_batch_size - 1024
+
+Vocabulary Size: 813196
+Train/Dev split: 210873/23430
+
+824 steps -> 1 epoch
+24 steps -> for dev 
+
+===================================================================================================================================================
+
+model - 1549631544 - 
+
+changes as compared to model_8Feb_1549626601 - 
+- batch_size", 64
+- evaluate_every", 1500,
+- checkpoint_every", 1500
+
+===================================================================================================================================================
+
+from tensorflow.contrib import learn
+import numpy as np
+import data_helpers
+
+base_dir = "/data/cnn-text-classification-tf/spamtest_yash/model_8Feb_1549613866/"
+vocab_path = base_dir + 'vocab'
+vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_path)
+
+vocab_dict = vocab_processor.vocabulary_._mapping
+
+
+
+def my_tokenizer_func(iterator):
+  return (x.split(" ") for x in iterator)
+
+
+base_dir_old = "/data/cnn-text-classification-tf/spamtest_yash/model_12Dec_1544432917/vocab"
+vocab_processor_old = learn.preprocessing.VocabularyProcessor.restore(base_dir_old)
+
+
+train - 105 seconds
+dev   - 36 seconds
+
+500 -> 105*5+36 = 561
+500 -> 141 *5   = 705 
+
+
+model_8Feb_1549626601
+
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_8Feb_1549626601/all_comments_27Dec.csv_prediction.csv all_comments_27Dec_1549626601_prediction.csv 
+
+===================================================================================================================================================
+
+transliteration - 
+https://pypi.org/project/Unidecode/
+function - unidecode_expect_ascii
+diacritic english ascii range - apply only on that range
+https://stackoverflow.com/questions/243831/unicode-block-of-a-character-in-python
+
+https://github.com/libindic/Transliteration/tree/master/docs
+
+===================================================================================================================================================
+
+:%s/foo/bar/gc
+
+:%s/\/data\/cnn-text-classification-tf\/runs\/1549631544/\/data1\/spam_filter\/cnn_saved_models\/saved_checkpoints\/model_8Feb_1549631544_35k_iters/gc
+
+scp yash.dalmia@172.24.61.119:/data1/spam_filter/cnn_saved_models/model_8Feb_1549631544/all_comments_27Dec.csv_prediction.csv all_comments_27Dec_1549631544_full_prediction.csv
+
+
+===================================================================================================================================================
+
+model - model_9Feb_1549721546 - 1549721546 -> 
+
+changes compared to 1549631544 - 
+- dev_sample_percentage", .05
+- evaluate_every", 500, checkpoint_every", 500
+- dev_step(x_dev, y_dev, writer=dev_summary_writer)
+  #batch_dev_step(x_dev, y_dev, writer=dev_summary_writer)
+config_fix_embed.yml
+- positive_data_file:
+  path: "data/rt-polaritydata/rt-polarity.pos"
+  
+  negative_data_file: 
+  path: "data/rt-polaritydata/rt-polarity.neg"
+
+===================================================================================================================================================
+
+model - 
+- changes as compared to 1549721546 - 
+to run for complete 200 epochs
+
+===================================================================================================================================================
+
+x_text len:  74732
+word2vec_vocab len:  697582
+word2vec_vocab len:  772314
+
+len vocab processor :  706397
+Vocabulary Size: 706397
+Train/Dev split: 70996/3736
+
+===================================================================================================================================================
+
+kaggle data with fix embed - 
+count seems to have decreased 
+accuracy increased ? - ET data
+
+will see how it goes with hindi fix embed
+
+===================================================================================================================================================
+
+rewards http call timeout - 
+
+httpCallV1  - property driven - 1 seconds
+send properties to mytimes producers and consumers
+
+keep the code read - verify on 120 server
+
+http://192.168.43.239/mytimes/getFeed/Activity?msid=64790901&curpg=1&appkey=TOI&sortcriteria=CreationDate&order=asc&size=100&pagenum=1&withReward=false
+
+===================================================================================================================================================
+
+test the best our data - frozen embed - on ET full month and last date -> model 1549732509
+
+to run tensorboard for a cnn model run - 
+nohup tensorboard --logdir /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf/runs/1549957214/ &
+
+===================================================================================================================================================
+
+done - TODO - 
+119 server - vim setting -> paste and nonumber
+
+===================================================================================================================================================
+
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya - master_cahya branch
+
+for jenkins migration - 
+comment moderator folder - move the property file 'env.js' to the folder location from script (dev ops job)
+
+36 hours - 200 epochs
+
+
+TODO - 
+also run english model on the same NBTO data
+files update ->> from polarity files predictions, from daily data, from editor marked comments
+
+
+against a religion, hatred language - to be removed
+
+===================================================================================================================================================
+
+GOOGLE SHEETS -> 
+
+rt-polarity-hindi_uniq_shuf.neg_1550222502_prediction - 
+https://docs.google.com/spreadsheets/d/1_Zqlnu-9jraccwf2Uur6QuZUXvJJwR2TzBN6Ye6yHh0/edit#gid=826029495
+
+rt-polarity-hindi_uniq_shuf.pos_1550222502_prediction - 
+https://docs.google.com/spreadsheets/d/1NIvhky8z2j_ysrPIAVXQAbed8CX2gNi2p0pk7mqOUos/edit#gid=1463928668
+
+Updated_rt-polarity-hindi_uniq_shuf.pos - 
+https://docs.google.com/spreadsheets/d/1QDPtAyiKxSe_RGqQfASoZaxqUCXwbKYOWyT-8RCVRrM/edit#gid=1463928668
+
+Updated_rt-polarity-hindi_uniq_shuf.neg - 
+https://docs.google.com/spreadsheets/d/1TXEjOw5XkM2MEofpYL_Ka7CGTJ_gU_PZgRZTVk6F1PA/edit#gid=826029495
+
+===================================================================================================================================================
+
+Done till now - 
+removed the first 1k from the neg list (after reverse ordering by prob after running the hindi model)
+updated the pos list 
+
+Ordering of updating the polarity data files - 
+
+Copy of NBTO_18Feb_1550222502_prediction - (update both pos and neg data files)
+https://docs.google.com/spreadsheets/d/1F6qhNZJqUyV3Cs3GNc3680dxa1LxlLSsORRrYSD6V2A/edit#gid=755628149
+
+
+times mobile - vineet choadhary
+
+===================================================================================================================================================
+
+Editor marked NBT comments - 
+To add the following (marked as 0) in the positive data files - 
+https://docs.google.com/spreadsheets/d/1PF93ScWKzAIGyTRUP1A6yOJVAmDSUKh5n0VHeXzt3T4/edit#gid=536298863
+
+===================================================================================================================================================
+
+TODO - verify the mail waala 58888 message
+
+===================================================================================================================================================
+
+mail is fine
+some issue with live
+
+===================================================================================================================================================
+
+movie review TOI hits - 
+normal - 
+https://timesofindia.indiatimes.com/commentsdataetimes.cms?msid=66588992,68013557&curpg=1&pcode=toi-wap&appkey=TOI&sortcriteria=CreationDate&order=asc&size=25&lastdeenid=123&after=true&withReward=true&pagenum=1
+
+from 58888 - 
+https://timesofindia.indiatimes.com/commentsdataetimes.cms?msid=66588992,68013557&curpg=1&pcode=TOI&appkey=TOI&sortcriteria=CreationDate&commenttype=agree&order=asc&size=25&lastdeenid=123&after=true&withReward=true&pagenum=1&smscomment=true
+
+to see the external mytimes call - 
+https://timesofindia.indiatimes.com/xml/commentsdataetimes.cms?msid=66588992,68013557&curpg=1&pcode=TOI&appkey=TOI&sortcriteria=CreationDate&commenttype=agree&order=asc&size=25&lastdeenid=123&after=true&withReward=true&pagenum=1&smscomment=true&showexturl=1&upcache=2
+
+the mytimes call hit for 58888 call - 
+https://myt.indiatimes.com/mytimes/getFeed/Activity?smsComment=true&showPriorityComment=true&msid=66588992%2C68013557&pagenum=1&appkey=TOI&sortcriteria=CreationDate&order=asc&size=25&after=true&userCommentId=
+
+===================================================================================================================================================
+
+TODO - 
+C_TYPE value to change
+batch - sms Raw message - Amit doing
+
+C_TYPE value -> (in activities, rawcomments, elasticsearch)
+db.activities.find({_id :2471402089})
+db.activities.update({_id :2471402089},{$set : { C_TYPE : "2"}})
+
+===================================================================================================================================================
+
+Data files - 
+
+positive polarity data file - 
+https://docs.google.com/spreadsheets/d/1QDPtAyiKxSe_RGqQfASoZaxqUCXwbKYOWyT-8RCVRrM/edit#gid=1463928668
+
+negative polarity data file - 
+https://docs.google.com/spreadsheets/d/1TXEjOw5XkM2MEofpYL_Ka7CGTJ_gU_PZgRZTVk6F1PA/edit#gid=826029495
+
+polarity positive file - trimmed length 400 - 
+https://docs.google.com/spreadsheets/d/1u094HtVQhfLYqMhbk3jRDSsoeaVcwIz2dKXCTTCE6No/edit#gid=1463928668
+
+===================================================================================================================================================
+
+Removed comments from polarity data file - due to length greater than 400 - 
+https://docs.google.com/spreadsheets/d/1iwgPEHui4ZvDyNtR65k10pOzt0iRfRh82WkAWwU1lgI/edit#gid=1463928668
+
+===================================================================================================================================================
+
+APIs - for SMS comments batch correction - 
+
+webroj.indiatimes.com/mytimes/publishToElasticSearchCommentQueue?commentActivityId=2471667961
+webroj.indiatimes.com/mytimes/setCommentTypeFieldValue?commentActivityId=2471667961
+
+===================================================================================================================================================
+
+to verify if run on all the comments - kibana query - 
+A_K:TOI AND _exists_:C_T AND NOT _exists_:SPAM_VAL.isSpam AND c_id:<823352498
+
+===================================================================================================================================================
+
+NBTO_1Jan_31Jan_1550661292_prediction - 
+https://docs.google.com/spreadsheets/d/1LU3Nc73bkPt4ibHFfmqlucJRQIE0I_ePZkQjs2bA4MU/edit#gid=2027368012
+
+NBTO_1Jan_31Jan_1551015767_prediction - 
+https://docs.google.com/spreadsheets/d/1Ql6gpd-XALS-3gNxJyeSxhnVC7qhaK5SoIiWbVNRSCs/edit#gid=503227222
+
+NBTO_1Jan_31Jan_1550839851_prediction - 
+https://docs.google.com/spreadsheets/d/1VlN0Tf8wzrv7zX7_N5W69MuXcaDOUIi1eKHWc721Tj0/edit#gid=758824640
+
+===================================================================================================================================================
+
+200 epochs (~234000 steps) - 
+1550839851
+
+same data and hyperparams as 1550839851 but run for 20000 steps - 
+/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1551015767/
+
+http://commentmoderator.indiatimes.com/mytimes/updateSpamMLObjForComment?commentId=2473537157
+
+older best model - 
+model_1550661292
+
+model_1551015767
+
+===================================================================================================================================================
+
+http://webroj.indiatimes.com/default.aspx?tokenkey=63c4d457-b9a0-4c6c-8c96-e7b3a9257be1&mobileno=919540079025&location=airtel@delhi&usermessage=rev tes Gagan 3 One time watch movie
+
+http://webroj.indiatimes.com/readers-opinion/smsComment?tokenkey=63c4d457-b9a0-4c6c-8c96-e7b3a9257be1&mobileno=919540079025&location=delhi@airtel&usermessage=rev tes Gagan 3 One time watch movie
+
+===================================================================================================================================================
+
+172.24.82.94 - true  - batches enabled
+172.24.81.47 - false - batches enabled
+
+===================================================================================================================================================
+
+On server 192.168.43.239 and 192.168.43.240 - 
+cat /opt/apache-tomcat-7.0.75/logs/mytimes.log* | grep "Exception in readJsonFromUrl for requestBody :" | wc -l
+
+===================================================================================================================================================
+
+scp yash.dalmia@172.24.61.119:/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/data/rt-polaritydata/rt-polarity-hindi_uniq_shuf.neg rt-polarity-hindi_uniq_shuf.neg_backup_26Feb
+
+===================================================================================================================================================
+
+To compare mongo elastic discrepancy - 
+
+in mongo - (dont use for a very long time range) - 
+db.rawcomments.find({C_D_Minute:{$gte:25853430, $lte:25855650}, A_N:{$in:["Commented", "Rated", "Replied"]}}).count()
+
+in kibana - extra long time range - 
+C_D_Minute:[25853430 TO 25855650]
+
+===================================================================================================================================================
+
+mailer - in last 30 days -
+at least 25 abusive -> at least 20% abusive -> top 10 sorted by spam counts
+
+===================================================================================================================================================
+
+
+from tensorflow.contrib import learn
+
+base_dir = "/data/cnn-text-classification-tf/spamtest_yash/model_8Feb_1549613866/"
+vocab_path = base_dir + 'vocab'
+vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_path)
+
+vocab_dict = vocab_processor.vocabulary_._mapping
+
+
+
+from tensorflow.contrib import learn
+
+word2vec_loc = "/data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin"
+vocab_loc = "/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1551015767/vocab"
+
+def my_tokenizer_func(iterator):
+    return (x.split(" ") for x in iterator)
+
+vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_loc)
+vocab_dict = vocab_processor.vocabulary_._mapping
+
+
+in the last 30 days -
+at least 25 spam comments  -> at least 20% abusive -> top 10 sorted by spam counts
+
+===================================================================================================================================================
+
+TODO - 
+hindi training
+retraining english data - newly marked editor comments
+process - rejection - user automation
+old webro - view the memory channel list for a user 
+
+===================================================================================================================================================
+
+ET comment moderator access - 
+http://commentmoderator.indiatimes.com/readers-opinion/createUser?role=ROLE_ADMIN&password=changeit&channelList=MALB,MTB,NBTB,TIMESB,FEMB,TAMB,ETBLOG,NBTRB,VKB,MFB,ESB,TELB,ET&email=deepak.ajwani@timesinternet.in
+
+===================================================================================================================================================
+
+New properties to be added - 
+titan.server.ip=172.29.16.172,172.29.16.173,192.168.43.241
+
+===================================================================================================================================================
+
+scp yash.dalmia@172.24.61.119:/data/cnn-text-classification-tf/spamtest_yash/model_12Dec_1544432917/NBTO_1Jan_31Jan.csv_prediction.csv NBTO_1Jan_31Jan_1544432917_prediction.csv
+
+
+
+word2vec_loc = "/data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin"
+
+vocab_loc = "/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1551015767/vocab"
+
+
+1500 comments done - NBT 1 month data - update the hindi list
+
+===================================================================================================================================================
+
+vocab_loc = "/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1551015767/vocab"
+word2vec_loc = "/data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin"
+
+from gensim.models import Word2Vec, KeyedVectors
+from tensorflow.contrib import learn
+
+def my_tokenizer_func(iterator):
+    return (x.split(" ") for x in iterator)
+
+word2vec_wv = KeyedVectors.load_word2vec_format(word2vec_loc, binary=True)
+vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_loc)
+
+vocab_dict = vocab_processor.vocabulary_._mapping
+
+===================================================================================================================================================
+
+user - no times points - 
+dahnyojpr9528quv3jn3419sn
+
+===================================================================================================================================================
+
+
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=desc&appKey=TOI&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&sDate=7%2F3%2F2019&from=0&size=10
+
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=desc&appKey=TOI&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&sDate=7%2F3%2F2019&from=0&size=10&aggField=A_ID&aggSize=100&aggMinDocCount=25
+
+
+first query - 
+http://192.168.42.194/mytimes/elasticCommentQuery?sort=desc&appKey=TOI&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&sDate=7%2F2%2F2019&eDate=6%2F3%2F2019&from=0&size=0&aggField=A_ID&aggSize=100&aggMinDocCount=25&queryString=NOT%20A_ID:0
+
+http://192.168.42.194/mytimes/elasticCommentQuery?sort=desc&appKey=TOI&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&sDate=7%2F2%2F2019&eDate=6%2F3%2F2019&from=0&size=0&aggField=A_ID&aggSize=100&aggMinDocCount=25&queryString=A_K:TOI%20AND%20SPAM_VAL.isSpam:true%20AND%20NOT%20A_ID:0
+
+http://192.168.42.194/mytimes/elasticCommentQuery?sort=desc&appKey=TOI&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&sDate=7%2F2%2F2019&eDate=6%2F3%2F2019&from=0&size=0&aggField=A_ID&aggSize=100&aggMinDocCount=25&queryString=_exists_:SPAM_VAL&multiActorId=665252647,628666388,6179270
+
+_exists_:SPAM_VAL
+
+
+
+common - filter - appkey TOI - 
+
+in query string - 
+SPAM_VAL.isSpam:true AND NOT A_ID:0
+
+
+in query string - 
+_exists_:SPAM_VAL
+in multi actor Ids - comma separated - 
+665252647,
+
+===================================================================================================================================================
+
+removed all the top misclassified comments
+removed some comments which contained the offensive words according to the excel sheet 'hindi_data_pos_most_freq' (https://docs.google.com/spreadsheets/d/1HtnMrSu8gQvp65Lzx1xSIjCZjXL3d9215G1NpAEJuRI/edit#gid=261833342)
+79310 - neg updated list 
+
+===================================================================================================================================================
+
+neg 8 march - 
+https://docs.google.com/spreadsheets/d/1Es4nrworoc4agMlPxkaEAf5IcA9QZ6flkHuB8dghiyk/edit#gid=828236255
+
+pos 8 march - 
+https://docs.google.com/spreadsheets/d/1TAoyxd9lv4xsa1MkD8vaG5XueTd7tO7NaYvGxCgt9p8/edit#gid=1463928668
+
+rt-polarity-hindi_uniq_shuf.pos_1551860056_prediction - 
+https://docs.google.com/spreadsheets/d/130_9dzErIvlzz8_q9eVsgvJHetvCzsU2uJ39oKvIRvg/edit#gid=1769874197
+
+===================================================================================================================================================
+
+Triggering aggregation user elastic cron - 
+192.168.36.98/batchMyTimes/triggerAggregationUserElasticBatch
+http://172.24.82.94/batchMyTimes/triggerAggregationUserElasticBatch
+
+===================================================================================================================================================
+
+Quest2Travel details - 
+https://mail.google.com/mail/u/1/#inbox/FMfcgxwBVqWtsbRcGJkhHMmcwDhSbPlh
+
+Offensive username - 
+https://mail.google.com/mail/u/1/#inbox/FMfcgxwBVgvswZTwFVQqzQkPRxJrhnWN
+
+===================================================================================================================================================
+
+encoding issue on servers 98, 100, 101 - working fine on the new jenkins servers - 
+
+http://172.24.81.47/mytimes/getCommentDetailByTimeFrame?msid=68361259&offset=0&length=1000&commentApproved=1&callback=jQuery31004794803204833977_1552388848379&data&_=1552388848380
+
+===================================================================================================================================================
+
+batchMyTimes - branch to be deployed - 
+aggreg_user_spam
+
+===================================================================================================================================================
+
+comment id - 2481302990 - email query not working 
+
+===================================================================================================================================================
+
+19 Mar (tues) - del to goa - 18:50 - 21:30 -> 6k
+24 Mar (sun) - goa to del ~ 15:20 -> 11k
+25 Mar (mon) - goa to del - 15:20 - 18:00 -> 8.4k
+
+
+19 March - tues - del to goa - 
+19:50 - Air Asia - 5994
+18:50 - Indigo   - 6792     (6317)
+17:50 - spicejet - 6617     
+
+
+24 March - sun - goa to del - 
+13:55 - 16:40 - air india - 11946 (11866)
+
+for 12 to 18:00 return -> >15k
+
+25 March - mon - goa to del - 
+~9k
+
+
+total - () - 18183
+
+===================================================================================================================================================
+
+working - 
+https://docs.google.com/spreadsheets/d/1MH08sZqaC_Mec1JcJJN1Rj2myOtK267B8-j18jn-Ufk/edit#gid=1975187343
+
+
+plt.savefig('/data/ourdata/yash_work/hindi_word2vec/pure_hindi/')
+
+
+===================================================================================================================================================
+
+
+data_helpers.get_datasets_mrpolarity
+data_helpers.load_data_labels
+
+
+
+word2vec_loc = '/data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin'
+
+from gensim.models import KeyedVectors, Word2Vec
+
+word2vec_wv = KeyedVectors.load_word2vec_format(cfg['word_embeddings']['word2vec']['path'], binary=True)
+word2vec_vocab = list(word2vec_wv.vocab.keys())
+
+
+from tensorflow.contrib import learn
+vocab_processor = learn.preprocessing.VocabularyProcessor.restore(vocab_path)
+
+
+1551860056
+
+vocab_path_en = '/data//cnn-text-classification-tf/runs/1544432917/vocab'
+vocab_processor_en = learn.preprocessing.VocabularyProcessor.restore(vocab_path_en)
+
+1544432917
+
+
+word2vec_loc = '/data/ourdata/yash_work/hindi_word2vec/pure_hindi/pure_hindi_min5_word2vec.bin'
+word2vec_wv = KeyedVectors.load_word2vec_format(word2vec_loc, binary=True)
+
+
+nohup tensorboard --logdir /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1552497139/ --port 6009 &
+
+nohup tensorboard --logdir /data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/runs/1552478400/ --port 6010 &
+
+
+
+ed9b0>, 'मट्ठी': <gensim.models.keyedve
+
+
+saved_models/model_1552478400_13Mar_weighted/NBTO_13March.csv_prediction.csv
+
+
+cat saved_models/model_1552478400_13Mar_weighted/rt-polarity-hindi_uniq_shuf.pos_prediction.csv | grep ",1," | wc -l
+
+
+scp yash.dalmia@172.24.61.119:/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1552478400_13Mar_weighted/NBTO_13March.csv_prediction.csv NBTO_13March_1552478400_prediction.csv
+
+
+plt.savefig('/data/ourdata/yash_work/hindi_word2vec/pure_hindi/')
+
+
+csvFilePath = 'commentsonly_chunk_hindi_cleaned_pure.csv'
+chunksize = 2000
+
+for chunk in pd.read_csv(csvFilePath, chunksize=chunksize):
+	list_chunk = chunk.iloc[:,0].tolist()
+	[x for x in list_chunk.split(' ')]
+
+===================================================================================================================================================
+
+hindi tokenizer - 
+https://github.com/taranjeet/hindi-tokenizer
+
+===================================================================================================================================================
+
+lib SVM baseline - 
+http://localhost:8888/notebooks/ML_model_spam_filter.ipynb#
+
+===================================================================================================================================================
+
+Count vectorizer - 
+https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html#sklearn.feature_extraction.text.CountVectorizer
+
+===================================================================================================================================================
+
+TOI_last30days_editors_18Mar - 
+https://docs.google.com/spreadsheets/u/1/d/1xLFGSSAW4WtgiJGVWs4deSQBr8i9v3gMRGbVYT9sW3o/edit#gid=1763525302
+
+users with spam count, total count, editor marked comments - 
+TOI_last6months_editors_users_18Mar - 
+https://docs.google.com/spreadsheets/d/1i6AYO5Kg8lfoZsrt7dbME1RCU-iE5n6tw4i7ELCwYR8/edit#gid=470326777
+
+NBT_most_spammy_users_acc_to_editors - 
+https://docs.google.com/spreadsheets/d/1xcepUX5sYdU40DWAZSI-0XX_Z-ULaK0sHrEC5bcBTsI/edit#gid=1858040008
+
+===================================================================================================================================================
+
+comparison of svm and cnn model - svm countvectorizer and tfidfvectorizer - 
+https://docs.google.com/spreadsheets/d/13A_phYc5vYtewaxZahPDD-OVYZFTvrfBOkqNimfzkhs/edit#gid=1845704114
+
+===================================================================================================================================================
+
+TOI - max 5000 - by spam users identified - (also includes already spam filter identified comments)
+
+https://docs.google.com/spreadsheets/d/1NkXQBnyzNmYjoshsH--IJqE9mzyuMwwnARU1Ni-qd-E/edit#gid=560627062 
+
+actors - 
+reddy.mrv@gmail.com
+cezayaxawo@hotmailpro.info
+osmium32@gmail.com
+sergei_lse@hotmail.com
+rahul70r@rediffmail.com
+nadirmkhan@hotmail.com
+ashwin_n81@rediffmail.com
+prowatz036@watersoup.com
+mnr786110@gmail.com
+kirurakesh33@gmail.com
+
+===================================================================================================================================================
+
+TOI - max 4000 - by spam users identified - (doesn't  includes already spam filter identified comments) - with length of comment text - 
+https://docs.google.com/spreadsheets/d/1ZqLbAqW652VYvHQWolC8pKDFQmR4Ns1HoHEiDkispek/edit#gid=485489878
+
+lines - 12584
+
+https://docs.google.com/spreadsheets/d/1euw_IvdUOEAsJZhKUBzQVCxGCaXbyYQqHyDcK0A8JXA/edit#gid=485489878
+comments above 400 length removed and less than 40 characters removed (to be checked by me) - 
+lines - 11885
+
+only less than 40 characters comments - (to be checked by me ) - 
+https://docs.google.com/spreadsheets/d/1FBDW9UOieWimxusd2jZYnco1Gy3x4Tw32fqNY3QkL_c/edit#gid=485489878
+
+split sentences - 
+https://docs.google.com/spreadsheets/d/1z4n5o6r9sW24LBDNNn-XTkQvkAjdLRuG71mUA0_76JY/edit#gid=892007996
+
+split sentences with predictions - 
+https://docs.google.com/spreadsheets/d/1GRNS4-JNbjRQj7bdRKLxjBcEVpav7cYJa_UGps5Icks/edit#gid=741793824
+
+===================================================================================================================================================
+
+TODO - later - 
+some auto process to truncate the spam sentences -> into relevant parts
+
+===================================================================================================================================================
+
+Manually trigger the user elastic aggregation batch process - 
+http://172.24.82.94/batchMyTimes/triggerAggregationUserElasticBatch
+
+===================================================================================================================================================
+
+nginx setup on centos - 
+sudo yum install epel-release
+sudo yum install nginx
+vim /etc/nginx/conf.d/virtual.conf
+sudo systemctl start nginx
+
+===================================================================================================================================================
+
+/opt/test_spam_ml/deploy/.env/bin/python app.py
+
+https://stackoverflow.com/questions/35919020/whats-the-difference-of-name-scope-and-a-variable-scope-in-tensorflow
+
+===================================================================================================================================================
+
+16 april - 21 april -> goa trip
+
+13 April (Saturday) -> 
+rs 5909 - 14:40 - 17:15  - indigo
+rs 5420 - 15:40 - 18:15  - indigo
+
+16 April (tuesday) -> 
+rs 5369 - 10:55 to 13:15 - air india
+rs 4933 - 19:55 to 22:20 - air asia
+rs 5337 - 12:10 to 14:50 - indigo (terminal 1)
+
+
+21 april (sunday) -> 
+rs 6405 - 14:10 to 16:35 - air india 
+rs 9765 - 14:10 to 16:50 - indigo  
+
+total - 16,250
+
+===================================================================================================================================================
+
+hindi english - 
+https://docs.google.com/spreadsheets/d/1HsxvnbPOz6U2jOms6RylvhoyiY8eIs9HpxMMXCsxB60/edit#gid=1282901976
+
+===================================================================================================================================================
+
+spam filter - 
+comment id - 2490358825
+
+===================================================================================================================================================
+
+Rohit - 
+next Friday
+
+===================================================================================================================================================
+
+backup of batch mytimes properties (batchMyTimes) - 
+/opt/backup_props/backup_5April/appConfig.properties_backup_5April
+
+===================================================================================================================================================
+
+Umytimes:PRIMARY> db.profanity_filter.find().pretty()
+{
+    "_id" : ObjectId("5ca72d6c6a2b0e36912ca8f5"),
+    "name" : "past_cmts",
+    "type" : "last_id",
+    "value" : NumberLong("2363674486")
+}
+{
+    "_id" : ObjectId("5ca72ee9039bd8317ec0fabb"),
+    "name" : "spam_rule",
+    "type" : "last_id",
+    "value" : NumberLong("2363674496")
+}
+
+http://myt.indiatimes.com/mytimes/setLastIdProfanity?name=past_cmts&lastId=2353460082
+http://myt.indiatimes.com/mytimes/readLastIdProfanity?name=past_cmts
+
+===================================================================================================================================================
+
+spam process - spring scheduled - running from 2490898124 Id
+
+===================================================================================================================================================
+
+New Last Id : 2491720589 not set 
+
+last id based to be run till - 
+c_id 2492022176 (9 April 12:01 PM)
+
+===================================================================================================================================================
+
+http://172.29.16.100/batchMyTimes/getProperties
+
+===================================================================================================================================================
+
+APIs to hit in domain based user blocking - rohit requirement - 
+To deactivate a user - 
+http://commentmoderator.indiatimes.com/mytimes/deactivateProfile?userID=29687377&editorEmail=commentmoderatormytimes@gmail.com
+
+to purge all the comments of a user - 
+http://commentmoderator.indiatimes.com/mytimes/purgeAllCommentsOfUserV2?userId=29687377&action=-1
+
+===================================================================================================================================================
+
+total - 409
+
+===================================================================================================================================================
+
+reject based on spam objects - 
+
+last Id - 2454488486
+31 march night
+
+
+to note -     
+17982 comments - approved spam TOI comments
+20606 comments - december 2018 - all spam TOI comments
+
+1 september to 30 november - 
+41951 results - approved spam TOI comments
+
+
+1 Jan 2018 - 31 Dec 2018 - 
+125859 results - approved spam TOI comments
+
+from start of time till 31 Dec 2018 - approved spam TOI comments count - 
+Comment Search Results : 915264 results
+
+===================================================================================================================================================
+
+http://172.24.81.47/mytimes/activityInactive?commentActivityId=2492822329&blockString=BLOCKED_DOMAIN
+
+===================================================================================================================================================
+
+http://myt.indiatimes.com/mytimes/addBlockedEmailId?email=gasikib@geronra.com1
+http://myt.indiatimes.com/mytimes/removeBlockedEmailId?email=yash0210dalmia1@here1n.net
+http://myt.indiatimes.com/mytimes/isBlockedEmailId?email=yash0210dalmia1@here1n.net
+
+===================================================================================================================================================
+
+http://commentmoderator.indiatimes.com/mytimes/publishToElasticSearchCommentQueue?commentActivityId=2471667961
+
+===================================================================================================================================================
+
+remaining spam identified approved TOI comments - 
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=desc&appKey=TOI&filterCommentStatus=APPROVED&eDate=31%2F1%2F2019&probabilityRange=0.5,1.0&from=0&size=50
+
+===================================================================================================================================================
+
+last commit regarding spam process - Wed Jan 23
+
+===================================================================================================================================================
+
+Problem Ids - 
+2448798631
+2447471889
+2440838613
+2438168351
+2434854158
+2430552621
+2430115366
+2417853786
+
+process running completely fine - in mongo DB 
+some comments are being left - in elastic 
+
+===================================================================================================================================================
+
+priyanka bug - 
+duplicate comments - 
+2491577798
+2491577819
+
+logged in comment - 2383808140
+
+===================================================================================================================================================
+
+not a bug - as passed by JCMS - 
+Actor Id present and comment rejected by unverified non-logged in processes - 
+A_ID: 22946371 AND C_APP_RES: UNVERIFIED_NON_LOGGED_IN
+
+
+
+NBT comments data distribution - 
+38% - atleast one eng character
+68% - atleast one hindi character
+6%  - hindi english combined
+
+===================================================================================================================================================
+
+Web, Wap, android - rejected by duplicate - percentage - rate pattern (by time)
+
+
+on NBT data, 
+17/124 - 87 % accurate
+7/144 - 95% accurate
+
+===================================================================================================================================================
+
+run by the following - 
+hindi and english character - hindi 
+english - english 
+
+===================================================================================================================================================
+
+
+NBT comments data distribution - 
+38% - atleast one eng character
+68% - atleast one hindi character
+6%  - hindi english combined
+
+
+4% identified by current model 1544432917 for (eng and non-hindi) comments of NBT 7-11 April
+current english model on pure english NBT data - 
+15/80 - wrongly identified - 81.25%
+
+
+Web, Wap, android - rejected by duplicate - percentage - rate pattern (by time)
+
+
+===================================================================================================================================================
+
+en and hindi model result -  NBTO_21Mar_27Mar_modV2 - 
+check for hindi char - if not spam, run on eng and check if spam, if true return that
+else return eng result
+
+https://docs.google.com/spreadsheets/d/1fLGDNPWq2PDRJ-9TKM0JByGF9HHHrwh02SGXg2SzQek/edit#gid=344050115
+
+===================================================================================================================================================
+
+hindi only on 1,5,10,14 April NBT data - 
+https://docs.google.com/spreadsheets/d/1qMQLoNsL982NjszC7Oc6lYWbe0LR-cIEmb_xI9pguTc/edit#gid=836372961
+
+===================================================================================================================================================
+
+NBT 15 April - 21 April data ->
+spam comments percentage caught - 1.48%
+
+===================================================================================================================================================
+
+word2vec model - most similar - 
+http://172.24.82.73:5000/
+http://172.24.82.73:5000/w2v_model
+http://172.24.82.73:5000/w2v_most_similar?query_word=hello&topn=10
+
+location - /opt/spam_services/config.ini
+
+===================================================================================================================================================
+
+python interpreter - 
+http://aosabook.org/en/500L/a-python-interpreter-written-in-python.html
+
+===================================================================================================================================================
+
+learn preprocessing - 
+https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/learn/python/learn/preprocessing/text.py
+
+===================================================================================================================================================
+
+pickling - serializing and deserializing - 
+When pickling, the required attributes are recorded as __name__.function , so, __main__ if run as main script and <filename> if run as import
+When unpickling, it tries to get the attributes from the same location
+But in gunicorn, the main file is different, so, not getting that attribute
+
+
+_pickle.PicklingError: Can't pickle <function my_tokenizer_func at 0x7f1a94cb4e18>: it's not the same object as __main__.my_tokenizer_func
+
+https://stackoverflow.com/questions/13398462/unpickling-python-objects-with-a-changed-module-path
+
+===================================================================================================================================================
+
+4728 comments - 
+
+~/spam_filter/jupyter_notebooks/data/most_abusive_TOI_last_90_days_25April.csv 
+
+http://commentmoderator.indiatimes.com/mytimes/elasticCommentQuery?sort=desc&filterCommentStatus=APPROVED,REJECTED,UNVERIFIED&sDateEpoch=1548412448000&eDateEpoch=1556188448000&appKey=TOI&queryString=_exists_:SPAM_VAL%20AND%20SPAM_VAL.isSpam:false&multiActorId=6179270,665245713,14219596,6267354,665046059,549930791,548178454,668244979,663707220,22541448,2366863,2589915,655718924,526173678,659669241,103473849,2515704
+
+===================================================================================================================================================
+
+NBT_24Apr_1551015767_predictionV2 - 
+https://docs.google.com/spreadsheets/d/142SzEDJjwG8vYbQ-uV6r3c9GUy4t5Aq0hlYbcs6ks5w/edit#gid=1164942651
+
+most_abusive_TOI_last_90_days_25April_retraining - 
+https://docs.google.com/spreadsheets/d/1U4_t9R_Pe23PWj6chnAt_CyZoNn67FWJllgt-uVkk-A/edit#gid=1949781733
+
+NBT_24Apr_1551860056_predictionV2 - 
+https://docs.google.com/spreadsheets/d/1tah85wMen6LCPSXp1MfvgOMBMPsLLxvlQZAKo4_ZNW4/edit#gid=1161947005
+
+compare_NBTO_1Mar_7Mar_1551860056_prediction_svm_count_vec - 
+https://docs.google.com/spreadsheets/d/1yJz_7bQ04YqUtFESU1-sCJ_N8zNHspyo6Z7j8FoZTKk/edit#gid=802881569
+
+NBT_24Apr_1551860056_svm_prediction - 
+https://docs.google.com/spreadsheets/d/1djGNMgC_XEhxhQsH3ewbNmZDfO8UxfUBV2hLfviJ9LE/edit#gid=329633889
+
+===================================================================================================================================================
+
+off_TOI_last_30_days_25April - 
+https://docs.google.com/spreadsheets/d/1xaF-Dc-41Ut71tZogrJ3Aj4-3TTRWmU-NDAG0IUnD1U/edit#gid=88237459
+
+most_abusive_TOI_last_90_days_25April_retraining - 
+https://docs.google.com/spreadsheets/d/1U4_t9R_Pe23PWj6chnAt_CyZoNn67FWJllgt-uVkk-A/edit#gid=1949781733
+
+off_TOI_last_60_days_1Jan - 
+https://docs.google.com/spreadsheets/d/1Qkz1-90lPQVuPhP6GpnXhw6OiidtZABV6TaqOiwbWWQ/edit#gid=1017071341
+
+===================================================================================================================================================
+
+SVM model run ->
+
+NBTO_15Apr_21Apr_1551860056_svm_prediction - 
+https://docs.google.com/spreadsheets/d/1EM1TNNf2SYfl8PiO-AbM1se0AGLWFfrI2iVXl8hdFhI/edit#gid=651152884
+
+NBT_24Apr_1551860056_svm_prediction - 
+https://docs.google.com/spreadsheets/d/1djGNMgC_XEhxhQsH3ewbNmZDfO8UxfUBV2hLfviJ9LE/edit#gid=329633889
+
+NBTO_15Apr_21Apr_1551015767_svm_prediction - 
+https://docs.google.com/spreadsheets/d/10t0i8es27e74dOU-S9OpOE-3zekIamSszFNLcqe6pFM/edit#gid=413231787
+
+NBTO_27_Apr_1551860056_svm_prediction - 
+https://docs.google.com/spreadsheets/d/1VUKEVVfETlR3n9EH8ZvT_NPS-xmfrbKu7WyY_bYZGdA/edit#gid=1150421384
+
+NBTO_28_Apr_1551860056_svm_prediction - 
+https://docs.google.com/spreadsheets/d/1jTCqdCNK0UxHNppeKX8W5FnlrOvTvh7AFr8T1H1qEx0/edit#gid=283873301
+
+===================================================================================================================================================
+
+caught - out of 1500 - 14 vs 10 (model 1551860056  vs svm)
+caught - out of 1800 - 15 vs 18 (model 1551860056  vs svm) (2/3 wrong)
+
+svm improvement - out of vocabulary and english - dont run
+
+===================================================================================================================================================
+===================================================================================================================================================
+
+saved_models/model_weights_hin_10e_128f_oversample.h5 - trainable
+
+keras - 1 is positive label (spam)
+
+===================================================================================================================================================
+
+lstm - 
+https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/kernels
+
+https://www.kaggle.com/ybonde/cleaning-word2vec-lstm-working
+
+DPCNN - 
+http://riejohnson.com/paper/dpcnn-acl17.pdf
+
+keras - bidirectional lstm - 
+https://www.kaggle.com/CVxTz/keras-bidirectional-lstm-baseline-lb-0-069
+
+===================================================================================================================================================
+
+NBTO_28_Apr_1551860056_bilstm_prediction - without word2vec - 
+https://docs.google.com/spreadsheets/d/1xbPXiRqi98euOkcVobtXfQ7zmybrT-ZSGFZd9p1PQHs/edit#gid=76917402
+
+===================================================================================================================================================
+
+bilstm with word2vec model location - 
+/data1/yash_work/spam_nn_process/lstm_classifier/lstm_train.py
+
+bilstm result - 
+https://docs.google.com/spreadsheets/d/1oJhk0k42p_-_YiDoKmhteyx3FwHIEAn4DbIuiQF0CzM/edit#gid=1499386846
+
+bilstm with w2v result - 
+NBT_24Apr_1551860056_bilstm_w2v_predictionV2 - 
+https://docs.google.com/spreadsheets/d/1oJhk0k42p_-_YiDoKmhteyx3FwHIEAn4DbIuiQF0CzM/edit#gid=1499386846
+
+bilstm with w2v result - 
+NBTO_15Apr_21Apr_1551860056_bilstm_w2v_prediction - 
+https://docs.google.com/spreadsheets/d/13iYpSrsWjaFZLMWMrD9Aw9Y6DC4QVitRR8XhyLIkzWw/edit#gid=1624357860
+
+for comparison - NBTO_15Apr_21Apr_1551860056_svm_prediction - 
+https://docs.google.com/spreadsheets/d/1EM1TNNf2SYfl8PiO-AbM1se0AGLWFfrI2iVXl8hdFhI/edit#gid=651152884
+
+shared with kapil sir - for comparison - NBT_24Apr_1551860056_predictionV2 - 
+https://docs.google.com/spreadsheets/d/1tah85wMen6LCPSXp1MfvgOMBMPsLLxvlQZAKo4_ZNW4/edit#gid=1161947005
+
+===================================================================================================================================================
+
+to start jupyter notebook at 119 server - 
+go to any folder and then, type the command - jupyter notebook  --allow-root
+password - times@1234 
+
+===================================================================================================================================================
+
+best model question ? - 
+do we have the best model that we can get with the data that we have ?
+
+===================================================================================================================================================
+
+to aggregate after modification - 
+=IF(ISBLANK(B2), A2, B2)
+
+rt-polarity-hindi_uniq_shuf_pos_backup1May trimmed - 
+https://docs.google.com/spreadsheets/d/1YcqsjKzylMZa6YrmzRLdMZESa0q3seOkWtIzpBS4BaE/edit#gid=158788446
+
+===================================================================================================================================================
+
+hindi spam list - 
+remove english written in hindi and propaganda texts - ?
+add ham sentences containing overfitted words in ham list
+
+two parts - proper offensive words and contexually offensive sentences
+
+===================================================================================================================================================
+
+offensive_words_hindi_from_spam_list - 
+https://docs.google.com/spreadsheets/d/1qItCBxVeOQ_LY-dn-Wbhxofpw2bR6fnQUrNNkIsZKHg/edit#gid=0
+
+===================================================================================================================================================
+
+spam_hindi_list_1760_mod - 
+https://docs.google.com/spreadsheets/d/1VfKbdUVZFqKsKrLy79DyYssebIm99SA0rjuLlnEUXkI/edit#gid=0
+
+shuffled of above data used in hindi model - 1556885726
+
+===================================================================================================================================================
+
+article - rating issue - multiple rating - 68715765
+
+===================================================================================================================================================
+
+to compare - 
+/data1/yash_work/spam_nn_process/lstm_classifieroutput_run/NBTO_2_3_4_May_predictionV2_bilstm_hin_trim.csv
+
+===================================================================================================================================================
+
+hindi offensive words only - 50 times - (50*52 = 2600 length)
+/data1/yash_work/spam_nn_process/lstm_classifier/data/rt-polarity-hindi_proper_off_only_50.pos
+
+===================================================================================================================================================
+
+HINDI model - 
+hindi spam list - 
+remove 'bakchodi'
+remove sentences which might be harming hindi model accuracy
+
+remove the ham sentences containing spam words - 91 sentences
+add the wrongly classified sentences in ham list
+
+later - duplicate -> remove ? - from spam list - 
+सुकला जी सुनिये - सिर्फ ये बाबा ही अकेला पापी नहीं है, एक और भी है - वो कौन है - में अभी बताता हूँ -- हज़रत मुहम्मद ने 54 साल की उम्र मे अपने सगे भाई अबू बकर की 6 साल की नन्हीं मुन्नी गुड़िया आइसा बेगम से निकाह का नाटक कर के उसके साथ सम्भोग सुरु कर दिया , तो इस पापी को क्या सज़ा मिलनी चाहिये , कोई कटुआ जवाब दे दे तो में अभी इस्लाम कबूल कर लूँगा - कोई है - अब कोई कटुआ सामने नहीं आयेगा
+इनके पिछवाड़े लट्ठ बरसाओ और जेल मे ही सड़ने दो.............................................................
+मादरचो*** नशा बेचते है, हीरोइन, गांजा , स्मेक का कारोबार करते है, प्रॉपर्टी पर कब्जा करते है, चोरी डाकेति, जबरन उगाही करते है......कुछ पैसो की खातिर किसी का भी सर कलम करने से नही हिचकते, अपनी मा बहनो को भी नही बख्सते , फिर भी मुसलमान है...नमाज़ पडते है सारे गुनाह माफ हो जाते है..साले हरामखोर हर तरह के कर्म करने के बाद भी बैंक को हराम बता रहे है........
+
+
+===================================================================================================================================================
+
+done - completed - till 1455 - revisiting edited ones
+https://docs.google.com/spreadsheets/d/1YcqsjKzylMZa6YrmzRLdMZESa0q3seOkWtIzpBS4BaE/edit#gid=158788446
+
+===================================================================================================================================================
+
+hindi_misclassified_to_be_added_to_ham - 
+https://docs.google.com/spreadsheets/d/1yHca8lIdjgam3frVH7pgp2RZQAe6JCN6X47HgvQPz0w/edit#gid=0
+
+===================================================================================================================================================
+
+jupyter notebook - 172.24.61.119 - 
+/data1/yash_work/jupyter_notebooks
+
+===================================================================================================================================================
+
+removed comments from hindi ham list- 
+hindi_neg_containing_off - 
+https://docs.google.com/spreadsheets/d/1XJTCiQLdoTefQsUEHkv7q75peYUtI9t-MLR3o2MMkOk/edit#gid=1467709298
+
+added_in_hindi_ham_list_10May - 
+https://docs.google.com/spreadsheets/d/1UHYMxITsHOv9lz4XNopTUusKC54uWReuG9ZExDONd7A/edit
+
+===================================================================================================================================================
+
+df format of the original rt-polarity-hindi_uniq_shuf_pos_backup1May trimmed - 
+to_save2_rt-polarity-hindi_uniq_shuf_pos_backup1May trimmed - 
+https://docs.google.com/spreadsheets/d/1OKpeWi23wXRHcLW_TcrTBrt-E4DS6tNENN-Qmo1zDHE/edit#gid=158788446
+
+===================================================================================================================================================
+
+NBTO_9_May_1551860056_1557492791_predictionV2 - 
+https://docs.google.com/spreadsheets/u/1/d/1wbCHlPj6OQ0bBK3tTWgr5QcEAP9WfweoWh0vdPrW2Bc/edit?ouid=103544493991573539109&usp=sheets_home&ths=true
+
+NBTO_8_May_1551860056_1557492791_predictionV2 - 
+https://docs.google.com/spreadsheets/d/1aIcZr7BtU2wyUx0WVzwGN7RiGpVCPMnmaU8_Ld0YHt0/edit#gid=433332202
+
+===================================================================================================================================================
+
+train one more model - 
+dont insert offensive word - dont create context 
+
+===================================================================================================================================================
+

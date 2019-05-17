@@ -1,0 +1,31 @@
+
+daily data shared - 
+NBTO_13_14_15_May_1557837780_prediction
+https://docs.google.com/spreadsheets/d/1XQYVgDr1Er4P4mj7FLOKBWs3XJXoT2uYuRzjppZgKRY/edit#gid=1825617811
+percentage of spam comments caught - 137/7468 - 1.83%
+
+===================================================================================================================================================
+
+multiple offensive profiles as shared by an end user - 
+https://mail.google.com/mail/u/1/#inbox/FMfcgxwCggBHCFpnKztlrLTQSstJxMhL
+
+===================================================================================================================================================
+
+gaps in theory - 
+c_text = "अनदर हरमखोर" ->
+'base_dir': '/data1/vanilla_cnn_dennybritz/cnn-text-classification-tf_cahya/saved_models/model_1557837780_20k',
+'rounded prob': '0.16430'
+
+'modified cText': 'अनदर हरामखोर',
+ 'rounded prob': '1.00000',
+
+ हरामखोर ~ हरमखोर -> 0.544
+
+===================================================================================================================================================
+
+14-15 May - 
+model_1558012024_20k vs bilstm - 
+7/91 vs 15/120
+
+===================================================================================================================================================
+
