@@ -29,3 +29,116 @@ model_1558012024_20k vs bilstm -
 
 ===================================================================================================================================================
 
+Working on - clean up (git commit of existing code), english retraining model
+
+Alias API ->
+https://keyword-aka.timesinternet.in/most_similar?query_word=narendra%20modi,kohli&topn=10
+LB server - 172.29.93.122
+live servers - 172.29.64.58, 172.29.64.59
+/conf.d
+
+need to clean up the code a bit - app.py
+
+===================================================================================================================================================
+
+English retraining data - 
+2501272990
+
+===================================================================================================================================================
+
+nginx - 
+server {
+    listen       80;
+    server_name  172.24.82.73 localhost 127.0.0.1;
+
+    location / {
+        #proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:5001;
+    }
+}
+
+pip install gevent
+pip install gunicorn
+
+using gevent to running gunicorn -
+nohup .env/bin/gunicorn app:app -b 0.0.0.0:5001 -k gevent &
+vim /opt/learned_model/config.ini 
+vim /etc/nginx/conf.d/virtual.conf 
+
+===================================================================================================================================================
+
+vim /opt/learned_model/config.ini  - 
+
+[DEFAULT]
+BaseUrlServer = localhost
+MultiCallApiDriven = True
+
+resultant APIs - 
+http://172.24.82.73/most_similar_single?query_word=narendra%20modi&topn=2
+http://172.24.82.73/most_similar_multi?query_word=narendra%20modi&topn=2
+
+===================================================================================================================================================
+
+keyword-aka ->
+DNS mapping not working
+
+add keyword-aka restart in jenkins
+
+add exception handling ApI call - http://172.24.82.73:5000/most_similar_multi?query_word=narendra%20modi&topn=2
+
+done - debug level logging - for each API call cache hit or not 
+
+===================================================================================================================================================
+
+jenkins - problem resolved, different groups made for different production servers
+
+topn optimisation - currently, different topn values do not hit the cache
+error also cached in nginx - timeout error - ?
+
+At live servers, the app is precomputing L2 norms before each call leading to very slow outputs -> 
+05/20/2019 12:58:59 PM: INFO: precomputing L2-norms of word weight vectors
+05/20/2019 12:59:11 PM: INFO: <class 'list'>
+05/20/2019 12:59:29 PM: INFO: checking keyword:narendra modi
+05/20/2019 12:59:29 PM: INFO: precomputing L2-norms of word weight vectors
+05/20/2019 12:59:38 PM: INFO: <class 'list'>
+05/20/2019 12:59:56 PM: INFO: checking keyword:narendra modi
+
+===================================================================================================================================================
+
+changes - 
+config file wv file location add
+word vector files
+
+===================================================================================================================================================
+updated config files on the servers - 
+
+[DEFAULT]
+ToRunInDebug = True
+ApplicationPort = 5000
+SimilarityThreshold = 0.6
+BaseUrlServer = localhost
+MultiCallApiDriven = True
+
+[file_location]
+#ModelFolderLocation = /opt/spam_services/word2vec_model/eng_updated_min5.model
+ModelFolderLocation = /opt/learned_model/tri.model
+KeyedVectorsFileLocation = /opt/learned_model/norm_word_vectors_tri_model.kv
+
+LogFileLocation = /var/log/api/keywords-aka.log
+
+===================================================================================================================================================
+
+config file mail draft - 
+
+Hi Rahul,
+
+Please make the following changes in the config files (location - /opt/learned_model/config.ini) of the 'keyword-aka' project on the servers 172.29.64.58 and 172.29.64.59 -> 
+
+Update the following property -> 
+MultiCallApiDriven = False
+
+Add the following property below the existing property 'ModelFolderLocation' -> 
+KeyedVectorsFileLocation = /opt/learned_model/norm_word_vectors_tri_model.kv
+
+===================================================================================================================================================
+
