@@ -128,17 +128,50 @@ LogFileLocation = /var/log/api/keywords-aka.log
 
 ===================================================================================================================================================
 
-config file mail draft - 
+finalized keyword-aka APIs -> 
+http://172.29.93.122/most_similar_multi?query_word=narendra%20modi,kohli&topn=10
+http://172.29.93.122/most_similar_single?query_word=narendra%20modi,kohli&topn=10
 
-Hi Rahul,
+https://keyword-aka.timesinternet.in/most_similar_multi?query_word=narendra%20modi,kohli,virat&topn=1
+https://keyword-aka.timesinternet.in/most_similar_single?query_word=narendra%20modi,kohli,virat&topn=1
 
-Please make the following changes in the config files (location - /opt/learned_model/config.ini) of the 'keyword-aka' project on the servers 172.29.64.58 and 172.29.64.59 -> 
+===================================================================================================================================================
 
-Update the following property -> 
-MultiCallApiDriven = False
+tri.model made with tri.py in /data1/TOIDump/
 
-Add the following property below the existing property 'ModelFolderLocation' -> 
-KeyedVectorsFileLocation = /opt/learned_model/norm_word_vectors_tri_model.kv
+k means clustering of word2vec - 
+http://ai.intelligentonlinetools.com/ml/text-clustering-doc2vec-word-embedding-machine-learning/
+https://ai.intelligentonlinetools.com/ml/text-clustering-word-embedding-machine-learning/
+
+try doc2Vec and other embedding vectors
+
+===================================================================================================================================================
+
+indrajeet offensive comment deleted - 
+https://mail.google.com/mail/u/1/#inbox/FMfcgxwCgCPClCPrshhsnNNxgjXNxbCT
+
+===================================================================================================================================================
+
+for vocab file of -> model_1557837780_20k -> 
+use model's file - 1558607621
+
+===================================================================================================================================================
+
+TODO - load testing - two new models 
+
+===================================================================================================================================================
+
+Spam check ML - 
+http://172.29.16.120/mytimes/spamCheckML?cText=dsaf%20adsfkaldsf&toTakeEnglish=true
+
+===================================================================================================================================================
+
+both equal -> 50 calls - 4 seconds
+
+delete mailer - check
+
+issue UI - comment moderator UI - shows red ('spam') for 0.6 marked hindi comment 
+resolution - make separate thresholds for NBT and TOI
 
 ===================================================================================================================================================
 

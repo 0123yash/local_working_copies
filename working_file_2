@@ -1485,12 +1485,25 @@ dont insert offensive word - dont create context
 
 ===================================================================================================================================================
 
-no live MAIL_TP 3 mailer for the user on NBT - 
+no live MAIL_TP 3 mailer for some users on NBT - 
 qatiltest111@dispostable.com
 qatiltest112@dispostable.com
 NBT:
 61450807
 62789632
+
+===================================================================================================================================================
+
+TODO - 22 May - 
+1) mail sanwli with the NBT hindi model results - done
+2) check python aka API issue - done
+3) priyanka - users - NBT live mailer issue - not replicating - working fine as of now -> replied NBT MAIL_TP 3 issue ?
+4) make complete hindi and english combined python API
+
+===================================================================================================================================================
+
+priyanka issue - 
+http://172.29.16.100:9097/mytimes/mailer?filter={%22activity.A_K%22:%22NBTO%22,%20%22activity.A_N%22:%20%22Replied%22,%20%22activity.F_ADD%22:%20%22qatiltest114@dispostable.com%22}&sort_by=-_id
 
 ===================================================================================================================================================
 
